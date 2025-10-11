@@ -3,11 +3,10 @@ package io.github.bartlomiejkrawczyk.linearsolver.expression
 import java.io.Serializable
 
 @JvmInline
-value class VariableName(val name: String) : Serializable
+value class VariableName(val value: String) : Serializable
 
-open class Variable(
-    val name: VariableName,
-) : Expression {
+interface Variable : Expression {
+    val name: VariableName
 
     override val coefficients: Map<VariableName, Double>
         get() = mapOf(name to 1.0)
@@ -49,16 +48,18 @@ open class Variable(
     }
 }
 
-open class BooleanVariable(name: VariableName) : Variable(name)
+open class BooleanVariable(
+    override val name: VariableName,
+) : Variable
 
 open class IntegerVariable(
-    name: VariableName,
+    override val name: VariableName,
     val lowerBound: Double = Double.NEGATIVE_INFINITY,
     val upperBound: Double = Double.POSITIVE_INFINITY,
-) : Variable(name)
+) : Variable
 
 open class NumericVariable(
-    name: VariableName,
+    override val name: VariableName,
     val lowerBound: Double = Double.NEGATIVE_INFINITY,
     val upperBound: Double = Double.POSITIVE_INFINITY,
-) : Variable(name)
+) : Variable

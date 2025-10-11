@@ -1,7 +1,5 @@
 package io.github.bartlomiejkrawczyk.linearsolver.expression
 
-import kotlin.collections.iterator
-
 interface Expression {
 
     val coefficients: Map<VariableName, Double>
@@ -29,7 +27,19 @@ interface Expression {
         }
         return LinearExpression(
             coefficients = newCoefficients,
-            constant = expression.constant,
+            constant = constant + expression.constant,
+        )
+    }
+
+    operator fun minus(expression: Expression): LinearExpression {
+        val rightCoefficients = expression.coefficients
+        val newCoefficients = coefficients.toMutableMap()
+        for ((variable, coefficient) in rightCoefficients) {
+            newCoefficients[variable] = newCoefficients.getOrDefault(variable, 0.0) - coefficient
+        }
+        return LinearExpression(
+            coefficients = newCoefficients,
+            constant = constant - expression.constant,
         )
     }
 }

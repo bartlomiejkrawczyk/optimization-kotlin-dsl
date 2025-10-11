@@ -1,5 +1,9 @@
 package io.github.bartlomiejkrawczyk.linearsolver.model
 
+import com.google.ortools.Loader
+import com.google.ortools.linearsolver.MPConstraint
+import com.google.ortools.linearsolver.MPSolver
+import com.google.ortools.linearsolver.MPVariable
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
 import io.github.bartlomiejkrawczyk.linearsolver.expression.*
@@ -214,17 +218,106 @@ class SolverConfigurationBuilder {
         if (constraints.isEmpty()) {
             throw IllegalStateException("At least one linear constraint configuration must be provided")
         }
+        if (variables.isEmpty()) {
+            throw IllegalStateException("At least one variable must be provided")
+        }
         if (objective == null) {
             throw IllegalStateException("Objective must be provided")
         }
         if (solver == null) {
             throw IllegalStateException("Choose solver")
         }
+
+        // load native libs once
+        Loader.loadNativeLibraries()
+
+        val solverInstance = MPSolver.createSolver(solver!!.name)
+        val solverVariables = mutableMapOf<VariableName, MPVariable>()
+
+        for (variable in variables) {
+            when (variable) {
+                is IntegerVariable -> {
+                    solverVariables += variable.name to solverInstance.makeIntVar(
+                        variable.lowerBound,
+                        variable.upperBound,
+                        variable.name.value,
+                    )
+                }
+
+                is NumericVariable -> {
+                    solverVariables += variable.name to solverInstance.makeNumVar(
+                        variable.lowerBound,
+                        variable.upperBound,
+                        variable.name.value,
+                    )
+                }
+
+                is BooleanVariable -> {
+                    solverVariables += variable.name to solverInstance.makeBoolVar(
+                        variable.name.value,
+                    )
+                }
+            }
+        }
+
+        val solverConstraints = mutableListOf<MPConstraint>()
+
+        for (constraint in constraints) {
+            val expression = constraint.left - constraint.right
+            val constant = -expression.constant
+
+            val solverConstraint = when (constraint.relationship) {
+                Relationship.LESS_EQUALS -> {
+                    solverInstance.makeConstraint(
+                        Double.NEGATIVE_INFINITY,
+                        constant,
+                        // TODO: name?
+                    )
+                }
+
+                Relationship.EQUALS -> {
+                    solverInstance.makeConstraint(
+                        constant,
+                        constant,
+                        // TODO: name?
+                    )
+                }
+
+                Relationship.GREATER_EQUALS -> {
+                    solverInstance.makeConstraint(
+                        constant,
+                        Double.POSITIVE_INFINITY,
+                        // TODO: name?
+                    )
+                }
+            }
+
+            expression.coefficients
+                .mapKeys { (name, _) -> solverVariables[name] }
+                .forEach { (variable, coefficient) -> solverConstraint.setCoefficient(variable, coefficient) }
+
+            solverConstraints += solverConstraint
+        }
+
+        val solverObjective = solverInstance.objective()
+
+        objective?.goal?.let { goal ->
+            when (goal) {
+                Goal.MIN -> solverObjective.setMinimization()
+                Goal.MAX -> solverObjective.setMaximization()
+            }
+        }
+
+        objective?.expression
+            ?.coefficients
+            ?.mapKeys { (name, _) -> solverVariables[name] }
+            ?.forEach { (variable, coefficient) -> solverObjective.setCoefficient(variable, coefficient) }
+
         return SolverConfiguration(
-            solver = TODO(),
-            constraints = TODO(),
-            objective = TODO(),
-            variables = TODO(),
+            solver = solverInstance,
+            constraints = solverConstraints,
+            objective = solverObjective,
+            variables = solverVariables.values.toList(),
         )
     }
 }

@@ -1,0 +1,47 @@
+package io.github.bartlomiejkrawczyk.expression
+
+data class Parameter(
+    val name: VariableName,
+    val coefficient: Double,
+) : Expression {
+
+    override val coefficients: Map<VariableName, Double>
+        get() = mapOf(name to coefficient)
+
+    override operator fun unaryMinus(): Parameter = copy(coefficient = -coefficient)
+
+    override operator fun times(number: Number): Parameter =
+        copy(coefficient = coefficient * number.toDouble())
+
+    operator fun plus(number: Number): LinearExpression {
+        return LinearExpression(
+            coefficients = mapOf(
+                name to coefficient,
+            ),
+            constant = number.toDouble(),
+        )
+    }
+
+    operator fun plus(parameter: Parameter): Expression {
+        if (parameter.name == name) {
+            return copy(coefficient = coefficient + parameter.coefficient)
+        }
+        return LinearExpression(
+            coefficients = mapOf(
+                name to coefficient,
+                parameter.name to parameter.coefficient,
+            ),
+        )
+    }
+
+    override operator fun plus(expression: Expression): LinearExpression {
+        val newCoefficients = expression.coefficients.toMutableMap()
+        newCoefficients[name] = newCoefficients.getOrDefault(name, 0.0) + coefficient
+        return LinearExpression(
+            coefficients = newCoefficients,
+            constant = expression.constant,
+        )
+    }
+
+    // TODO: minus!
+}

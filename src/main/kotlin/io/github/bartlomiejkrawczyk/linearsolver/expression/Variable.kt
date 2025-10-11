@@ -46,6 +46,38 @@ interface Variable : Expression {
             constant = expression.constant,
         )
     }
+
+    operator fun minus(number: Number): LinearExpression {
+        return LinearExpression(
+            coefficients = mapOf(
+                name to 1.0,
+            ),
+            constant = -number.toDouble(),
+        )
+    }
+
+    operator fun minus(parameter: Parameter): Expression {
+        if (parameter.name == name) {
+            return Parameter(coefficient = 1.0 + parameter.coefficient, name = name)
+        }
+        return LinearExpression(
+            coefficients = mapOf(
+                name to 1.0,
+                parameter.name to -parameter.coefficient,
+            ),
+        )
+    }
+
+    override operator fun minus(expression: Expression): LinearExpression {
+        val newCoefficients = expression.coefficients
+            .mapValues { (_, coefficient) -> -coefficient }
+            .toMutableMap()
+        newCoefficients[name] = newCoefficients.getOrDefault(name, 0.0) + 1.0
+        return LinearExpression(
+            coefficients = newCoefficients,
+            constant = -expression.constant,
+        )
+    }
 }
 
 open class BooleanVariable(

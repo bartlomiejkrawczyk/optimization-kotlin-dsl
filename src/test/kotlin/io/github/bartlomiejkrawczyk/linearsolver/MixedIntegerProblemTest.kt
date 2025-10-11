@@ -10,8 +10,8 @@ class MixedIntegerProblemTest {
 
     @Test
     fun `optimization problem should be optimal`() {
-        val status = optimization {
-            solver(SolverType.CBC_MIXED_INTEGER_PROGRAMMING)
+        val (status, config) = optimization {
+            solver(SolverType.SCIP_MIXED_INTEGER_PROGRAMMING)
 
             val x = intVar("x")
             val y = numVar("y")
@@ -21,13 +21,21 @@ class MixedIntegerProblemTest {
 
             x le 3
             y le 2
-            5 * y le (x + 3) * 2
+            5 * y eq (x + 3) * 2
 
             for (variable in variables) {
                 variable le 1
             }
 
-            x * 2 + y * 3 + 4 * z to Goal.MIN
+            x * 2 + y * 3 + 4 * z to Goal.MAX
+        }
+
+        println("OBJECTIVE")
+        println("Optimal objective value = ${config.objective.value()}")
+
+        println("VARIABLES")
+        config.variables.forEach { variable ->
+            println("${variable.name()} = ${variable.solutionValue()}")
         }
 
         Assertions.assertEquals(

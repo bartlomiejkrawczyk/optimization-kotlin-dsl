@@ -15,7 +15,7 @@ class SolverConfigurationBuilder {
 
     var tolerance: Double = 1e-7
 
-    var solver: SolverType? = null
+    var solver: SolverType? = SolverType.SCIP_MIXED_INTEGER_PROGRAMMING
 
     var sequence: Int = 1
 
@@ -246,6 +246,15 @@ class SolverConfigurationBuilder {
             constant = toDouble() - expression.constant,
             coefficients = expression.coefficients.mapValues { -it.value },
         )
+    }
+
+    // Collection extensions
+    fun <T : Expression> Array<T>.sum(): Expression {
+        return reduce<Expression, Expression> { a, b -> a + b }
+    }
+
+    fun <T : Expression> Collection<T>.sum(): Expression {
+        return reduce<Expression, Expression> { a, b -> a + b }
     }
 
     // Builder method

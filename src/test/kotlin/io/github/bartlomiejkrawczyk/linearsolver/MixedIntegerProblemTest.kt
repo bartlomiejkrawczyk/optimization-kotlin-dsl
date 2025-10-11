@@ -19,15 +19,20 @@ class MixedIntegerProblemTest {
 
             val variables = listOf(x, y, z)
 
-            x le 3
-            y le 2
+            // OBJECTIVE
+            x * 2 + y * 3 + 4 * z to Goal.MAX
+
+            // CONSTRAINTS
+            x + y le 3
+            y - 1 le 2
+
             5 * y eq (x + 3) * 2
 
             for (variable in variables) {
-                variable le 1
+                variable le 1.5
             }
 
-            x * 2 + y * 3 + 4 * z to Goal.MAX
+            variables.sum() le y
         }
 
         println("OBJECTIVE")

@@ -26,7 +26,7 @@ java {
 repositories {
     mavenCentral()
     maven {
-        url = uri("https://maven.pkg.github.com/bartlomiejkrawczyk/MATCH-OPTIMIZER")
+        url = uri("https://maven.pkg.github.com/bartlomiejkrawczyk/optimization-kotlin-dsl")
         credentials {
             username = System.getenv("GITHUB_ACTOR") ?: project.extra.properties["GITHUB_ACTOR"].toString()
             password = System.getenv("GITHUB_TOKEN") ?: project.extra.properties["GITHUB_TOKEN"].toString()
@@ -50,7 +50,38 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
 }
 
-extensions.configure<PublishingExtension>("publishing") {
+publishing {
+    publications {
+        create<MavenPublication>("gpr") {
+            from(components["java"])
+
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+
+            pom {
+                name.set(project.name)
+                description.set(project.description)
+                url.set("https://github.com/bartlomiejkrawczyk/optimization-kotlin-dsl")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("bartlomiejkrawczyk")
+                        name.set("Bartłomiej Krawczyk")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/bartlomiejkrawczyk/optimization-kotlin-dsl")
+                }
+            }
+        }
+    }
+
     repositories {
         maven {
             name = "GitHubPackages"

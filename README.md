@@ -7,8 +7,6 @@
 
 > A concise Kotlin DSL wrapper for Google's [OR-Tools](https://developers.google.com/optimization) Linear Solver.
 
----
-
 ## Overview
 
 **Optimization Kotlin DSL** is a lightweight and expressive Kotlin Domain-Specific Language (DSL) for defining and
@@ -21,8 +19,6 @@ It simplifies model creation by providing idiomatic Kotlin syntax while supporti
 
 Inspired by [`io.justdevit:simplex-kotlin-dsl`](https://github.com/temofey1989/simplex-kotlin-dsl), this library extends
 its concept to cover a wider range of solver types.
-
----
 
 ## Example Usage
 
@@ -72,8 +68,6 @@ y = 0.7999999999999999
 z = 1.0
 ```
 
----
-
 ## Installation
 
 Add the dependency to your **Maven** or **Gradle** project.
@@ -97,8 +91,6 @@ dependencies {
 }
 ```
 
----
-
 ## Build Configuration
 
 This project is built with **Gradle** and configured for publication to **GitHub Packages**.
@@ -121,13 +113,9 @@ GITHUB_ACTOR=your_github_username
 GITHUB_TOKEN=your_personal_access_token
 ```
 
----
-
 ## License
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
-
----
 
 ## Contributing
 
@@ -141,8 +129,6 @@ If you'd like to contribute:
 4. Open a Pull Request
 
 Issues, suggestions, and improvements are highly appreciated.
-
----
 
 ## Links
 

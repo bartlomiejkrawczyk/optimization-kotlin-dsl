@@ -1,11 +1,19 @@
-package io.github.bartlomiejkrawczyk.model
+package io.github.bartlomiejkrawczyk.linearsolver.model
 
-import io.github.bartlomiejkrawczyk.constraint.Constraint
-import io.github.bartlomiejkrawczyk.constraint.Relationship
-import io.github.bartlomiejkrawczyk.expression.*
-import io.github.bartlomiejkrawczyk.objective.Goal
-import io.github.bartlomiejkrawczyk.objective.Objective
-import io.github.bartlomiejkrawczyk.solver.SolverType
+import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
+import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
+import io.github.bartlomiejkrawczyk.linearsolver.expression.BooleanVariable
+import io.github.bartlomiejkrawczyk.linearsolver.expression.Expression
+import io.github.bartlomiejkrawczyk.linearsolver.expression.IntegerVariable
+import io.github.bartlomiejkrawczyk.linearsolver.expression.LinearExpression
+import io.github.bartlomiejkrawczyk.linearsolver.expression.NumericVariable
+import io.github.bartlomiejkrawczyk.linearsolver.expression.Parameter
+import io.github.bartlomiejkrawczyk.linearsolver.expression.Variable
+import io.github.bartlomiejkrawczyk.linearsolver.expression.VariableName
+import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
+import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
+import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
+import kotlin.collections.plusAssign
 
 class SolverConfigurationBuilder {
 
@@ -84,7 +92,7 @@ class SolverConfigurationBuilder {
         right: Expression,
         relationship: Relationship,
     ) {
-        constraints += Constraint(
+        constraints plusAssign Constraint(
             left = left,
             right = right,
             relationship = relationship
@@ -92,7 +100,7 @@ class SolverConfigurationBuilder {
     }
 
     infix fun Expression.lessEquals(value: Number) {
-        constraints += Constraint(
+        constraints plusAssign Constraint(
             left = this@lessEquals,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.LESS_EQUALS,
@@ -100,7 +108,7 @@ class SolverConfigurationBuilder {
     }
 
     infix fun Expression.lessEquals(other: Expression) {
-        constraints += Constraint(
+        constraints plusAssign Constraint(
             left = this@lessEquals,
             right = other,
             relationship = Relationship.LESS_EQUALS,
@@ -108,7 +116,7 @@ class SolverConfigurationBuilder {
     }
 
     infix fun Expression.equals(value: Number) {
-        constraints += Constraint(
+        constraints plusAssign Constraint(
             left = this@equals,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.EQUALS,
@@ -116,7 +124,7 @@ class SolverConfigurationBuilder {
     }
 
     infix fun Expression.equals(other: Expression) {
-        constraints += Constraint(
+        constraints plusAssign Constraint(
             left = this@equals,
             right = other,
             relationship = Relationship.EQUALS,
@@ -124,7 +132,7 @@ class SolverConfigurationBuilder {
     }
 
     infix fun Expression.greaterEquals(value: Number) {
-        constraints += Constraint(
+        constraints plusAssign Constraint(
             left = this@greaterEquals,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.GREATER_EQUALS,
@@ -132,7 +140,7 @@ class SolverConfigurationBuilder {
     }
 
     infix fun Expression.greaterEquals(other: Expression) {
-        constraints += Constraint(
+        constraints plusAssign Constraint(
             left = this@greaterEquals,
             right = other,
             relationship = Relationship.GREATER_EQUALS,

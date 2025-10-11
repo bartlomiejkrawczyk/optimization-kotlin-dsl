@@ -1,9 +1,9 @@
-package io.github.bartlomiejkrawczyk.model
+package io.github.bartlomiejkrawczyk.linearsolver.model
 
 import com.google.ortools.linearsolver.MPConstraint
 import com.google.ortools.linearsolver.MPObjective
 import com.google.ortools.linearsolver.MPSolver
-import io.github.bartlomiejkrawczyk.expression.Variable
+import io.github.bartlomiejkrawczyk.linearsolver.expression.Variable
 
 class SolverConfiguration(
 

@@ -1,4 +1,4 @@
-package io.github.bartlomiejkrawczyk.expression
+package io.github.bartlomiejkrawczyk.linearsolver.expression
 
 import kotlin.collections.iterator
 

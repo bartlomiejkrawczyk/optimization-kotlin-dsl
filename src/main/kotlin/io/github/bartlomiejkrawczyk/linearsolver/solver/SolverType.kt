@@ -1,4 +1,4 @@
-package io.github.bartlomiejkrawczyk.solver
+package io.github.bartlomiejkrawczyk.linearsolver.solver
 
 enum class SolverType {
     CLP_LINEAR_PROGRAMMING, CLP,

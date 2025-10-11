@@ -1,4 +1,4 @@
-package io.github.bartlomiejkrawczyk.expression
+package io.github.bartlomiejkrawczyk.linearsolver.expression
 
 data class Parameter(
     val name: VariableName,

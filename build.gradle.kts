@@ -45,7 +45,7 @@ configurations {
 }
 
 dependencies {
-    implementation("com.google.ortools:ortools-java:9.14.6206")
+    api("com.google.ortools:ortools-java:9.14.6206")
 
     testImplementation("org.spockframework:spock-core:2.4-M6-groovy-4.0")
 }

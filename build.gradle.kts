@@ -1,7 +1,9 @@
 plugins {
     kotlin("jvm") version "2.2.20"
 
+    id("signing")
     id("maven-publish")
+    id("com.coditory.manifest") version "1.1.0"
 }
 
 group = "io.github.bartlomiejkrawczyk"
@@ -20,6 +22,7 @@ java {
     }
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
 }
 
 repositories {
@@ -56,9 +59,15 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+manifest {
+    buildAttributes = true
+    implementationAttributes = true
+    scmAttributes = true
+}
+
 publishing {
     publications {
-        create<MavenPublication>("gpr") {
+        create<MavenPublication>("mavenCentral") {
             from(components["java"])
 
             groupId = project.group.toString()
@@ -79,9 +88,12 @@ publishing {
                     developer {
                         id.set("bartlomiejkrawczyk")
                         name.set("Bartłomiej Krawczyk")
+                        url.set("https://github.com/bartlomiejkrawczyk")
                     }
                 }
                 scm {
+                    connection.set("scm:git:https://github.com/bartlomiejkrawczyk/optimization-kotlin-dsl.git")
+                    developerConnection.set("scm:git:ssh://github.com/bartlomiejkrawczyk/optimization-kotlin-dsl.git")
                     url.set("https://github.com/bartlomiejkrawczyk/optimization-kotlin-dsl")
                 }
             }
@@ -97,5 +109,25 @@ publishing {
                 password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("GITHUB_TOKEN").toString()
             }
         }
+        maven {
+            name = "OSSRH"
+
+            val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+            url = if (version.toString().startsWith("v")) releasesRepoUrl else snapshotsRepoUrl
+
+            credentials {
+                username = System.getenv("OSSRH_USERNAME") ?: project.findProperty("OSSRH_USERNAME").toString()
+                password = System.getenv("OSSRH_PASSWORD") ?: project.findProperty("OSSRH_PASSWORD").toString()
+            }
+        }
     }
+}
+
+signing {
+    useInMemoryPgpKeys(
+        System.getenv("GPG_PRIVATE_KEY") ?: project.findProperty("GPG_PRIVATE_KEY").toString(),
+        System.getenv("GPG_PASSPHRASE") ?: project.findProperty("GPG_PASSPHRASE").toString(),
+    )
+    sign(publishing.publications["mavenCentral"])
 }

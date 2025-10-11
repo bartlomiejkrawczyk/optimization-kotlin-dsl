@@ -2,18 +2,10 @@ package io.github.bartlomiejkrawczyk.linearsolver.model
 
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
-import io.github.bartlomiejkrawczyk.linearsolver.expression.BooleanVariable
-import io.github.bartlomiejkrawczyk.linearsolver.expression.Expression
-import io.github.bartlomiejkrawczyk.linearsolver.expression.IntegerVariable
-import io.github.bartlomiejkrawczyk.linearsolver.expression.LinearExpression
-import io.github.bartlomiejkrawczyk.linearsolver.expression.NumericVariable
-import io.github.bartlomiejkrawczyk.linearsolver.expression.Parameter
-import io.github.bartlomiejkrawczyk.linearsolver.expression.Variable
-import io.github.bartlomiejkrawczyk.linearsolver.expression.VariableName
+import io.github.bartlomiejkrawczyk.linearsolver.expression.*
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
-import kotlin.collections.plusAssign
 
 class SolverConfigurationBuilder {
 
@@ -92,56 +84,56 @@ class SolverConfigurationBuilder {
         right: Expression,
         relationship: Relationship,
     ) {
-        constraints plusAssign Constraint(
+        constraints += Constraint(
             left = left,
             right = right,
             relationship = relationship
         )
     }
 
-    infix fun Expression.lessEquals(value: Number) {
-        constraints plusAssign Constraint(
-            left = this@lessEquals,
+    infix fun Expression.le(value: Number) {
+        constraints += Constraint(
+            left = this@le,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.LESS_EQUALS,
         )
     }
 
-    infix fun Expression.lessEquals(other: Expression) {
-        constraints plusAssign Constraint(
-            left = this@lessEquals,
+    infix fun Expression.le(other: Expression) {
+        constraints += Constraint(
+            left = this@le,
             right = other,
             relationship = Relationship.LESS_EQUALS,
         )
     }
 
-    infix fun Expression.equals(value: Number) {
-        constraints plusAssign Constraint(
-            left = this@equals,
+    infix fun Expression.eq(value: Number) {
+        constraints += Constraint(
+            left = this@eq,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.EQUALS,
         )
     }
 
-    infix fun Expression.equals(other: Expression) {
-        constraints plusAssign Constraint(
-            left = this@equals,
+    infix fun Expression.eq(other: Expression) {
+        constraints += Constraint(
+            left = this@eq,
             right = other,
             relationship = Relationship.EQUALS,
         )
     }
 
-    infix fun Expression.greaterEquals(value: Number) {
-        constraints plusAssign Constraint(
-            left = this@greaterEquals,
+    infix fun Expression.ge(value: Number) {
+        constraints += Constraint(
+            left = this@ge,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.GREATER_EQUALS,
         )
     }
 
-    infix fun Expression.greaterEquals(other: Expression) {
-        constraints plusAssign Constraint(
-            left = this@greaterEquals,
+    infix fun Expression.ge(other: Expression) {
+        constraints += Constraint(
+            left = this@ge,
             right = other,
             relationship = Relationship.GREATER_EQUALS,
         )

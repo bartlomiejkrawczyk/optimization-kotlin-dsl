@@ -2,8 +2,7 @@
 
 ![](https://github.com/bartlomiejkrawczyk/optimization-kotlin-dsl/actions/workflows/build.yml/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-
-[//]: # ([![Maven Central]&#40;https://img.shields.io/maven-central/v/io.github.bartlomiejkrawczyk/optimization-kotlin-dsl&#41;]&#40;https://search.maven.org/artifact/io.github.bartlomiejkrawczyk/optimization-kotlin-dsl&#41;)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.bartlomiejkrawczyk/optimization-kotlin-dsl)](https://search.maven.org/artifact/io.github.bartlomiejkrawczyk/optimization-kotlin-dsl)
 
 > A concise Kotlin DSL wrapper for Google's [OR-Tools](https://developers.google.com/optimization) Linear Solver.
 

@@ -4,6 +4,7 @@ import com.google.ortools.Loader
 import com.google.ortools.linearsolver.MPConstraint
 import com.google.ortools.linearsolver.MPSolver
 import com.google.ortools.linearsolver.MPVariable
+import io.github.bartlomiejkrawczyk.linearsolver.OptimizerDslMarker
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
 import io.github.bartlomiejkrawczyk.linearsolver.expression.*
@@ -11,6 +12,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 
+@OptimizerDslMarker
 class SolverConfigurationBuilder {
 
     var tolerance: Double = 1e-7

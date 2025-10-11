@@ -51,7 +51,7 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish with Gradle
-        run: ./gradlew -Pversion="${{ env.VERSION }}" publish
+        run: ./gradlew -Pversion="${{ env.VERSION }}" publishAllPublicationsToGitHubPackagesRepository publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           VERSION: ${{ needs.set-version.outputs.version }}
           GITHUB_ACTOR: ${{ github.actor }}

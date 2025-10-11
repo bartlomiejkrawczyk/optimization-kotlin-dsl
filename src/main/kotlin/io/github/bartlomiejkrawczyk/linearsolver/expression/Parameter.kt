@@ -43,5 +43,35 @@ data class Parameter(
         )
     }
 
-    // TODO: minus!
+    operator fun minus(number: Number): LinearExpression {
+        return LinearExpression(
+            coefficients = mapOf(
+                name to coefficient,
+            ),
+            constant = -number.toDouble(),
+        )
+    }
+
+    operator fun minus(parameter: Parameter): Expression {
+        if (parameter.name == name) {
+            return copy(coefficient = coefficient - parameter.coefficient)
+        }
+        return LinearExpression(
+            coefficients = mapOf(
+                name to coefficient,
+                parameter.name to -parameter.coefficient,
+            ),
+        )
+    }
+
+    override operator fun minus(expression: Expression): LinearExpression {
+        val newCoefficients = expression.coefficients
+            .mapValues { (_, coefficient) -> -coefficient }
+            .toMutableMap()
+        newCoefficients[name] = newCoefficients.getOrDefault(name, 0.0) + coefficient
+        return LinearExpression(
+            coefficients = newCoefficients,
+            constant = -expression.constant,
+        )
+    }
 }

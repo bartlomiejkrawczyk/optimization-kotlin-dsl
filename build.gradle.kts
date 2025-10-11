@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm") version "2.2.20"
-    groovy
 
     id("maven-publish")
 }
@@ -35,6 +34,11 @@ repositories {
 }
 
 tasks.withType<Test> {
+    testLogging {
+        events("passed", "failed", "skipped")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStandardStreams = true
+    }
     useJUnitPlatform()
 }
 
@@ -47,7 +51,9 @@ configurations {
 dependencies {
     api("com.google.ortools:ortools-java:9.14.6206")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
+    testImplementation(platform("org.junit:junit-bom:6.0.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 publishing {

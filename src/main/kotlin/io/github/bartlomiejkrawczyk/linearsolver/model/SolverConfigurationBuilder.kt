@@ -1,5 +1,9 @@
 package io.github.bartlomiejkrawczyk.linearsolver.model
 
+import com.google.ortools.Loader
+import com.google.ortools.linearsolver.MPConstraint
+import com.google.ortools.linearsolver.MPSolver
+import com.google.ortools.linearsolver.MPVariable
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
 import io.github.bartlomiejkrawczyk.linearsolver.expression.*
@@ -9,15 +13,17 @@ import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 
 class SolverConfigurationBuilder {
 
-    private var solver: SolverType? = null
+    var tolerance: Double = 1e-7
 
-    private var sequence: Int = 1
+    var solver: SolverType? = null
 
-    private var variables = mutableMapOf<VariableName, Variable>()
+    var sequence: Int = 1
 
-    private val constraints = mutableListOf<Constraint>()
+    var objective: Objective? = null
 
-    private var objective: Objective? = null
+    val variables = mutableMapOf<VariableName, Variable>()
+
+    val constraints = mutableListOf<Constraint>()
 
     fun solver(type: SolverType) {
         this.solver = type
@@ -83,85 +89,105 @@ class SolverConfigurationBuilder {
         left: Expression,
         right: Expression,
         relationship: Relationship,
-    ) {
-        constraints += Constraint(
+    ): Constraint {
+        val constraint = Constraint(
             left = left,
             right = right,
             relationship = relationship
         )
+        constraints += constraint
+        return constraint
     }
 
-    infix fun Expression.le(value: Number) {
-        constraints += Constraint(
+    infix fun Expression.le(value: Number): Constraint {
+        val constraint = Constraint(
             left = this@le,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.LESS_EQUALS,
         )
+        constraints += constraint
+        return constraint
     }
 
-    infix fun Expression.le(other: Expression) {
-        constraints += Constraint(
+    infix fun Expression.le(other: Expression): Constraint {
+        val constraint = Constraint(
             left = this@le,
             right = other,
             relationship = Relationship.LESS_EQUALS,
         )
+        constraints += constraint
+        return constraint
     }
 
-    infix fun Expression.eq(value: Number) {
-        constraints += Constraint(
+    infix fun Expression.eq(value: Number): Constraint {
+        val constraint = Constraint(
             left = this@eq,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.EQUALS,
         )
+        constraints += constraint
+        return constraint
     }
 
-    infix fun Expression.eq(other: Expression) {
-        constraints += Constraint(
+    infix fun Expression.eq(other: Expression): Constraint {
+        val constraint = Constraint(
             left = this@eq,
             right = other,
             relationship = Relationship.EQUALS,
         )
+        constraints += constraint
+        return constraint
     }
 
-    infix fun Expression.ge(value: Number) {
-        constraints += Constraint(
+    infix fun Expression.ge(value: Number): Constraint {
+        val constraint = Constraint(
             left = this@ge,
             right = LinearExpression(constant = value.toDouble()),
             relationship = Relationship.GREATER_EQUALS,
         )
+        constraints += constraint
+        return constraint
     }
 
-    infix fun Expression.ge(other: Expression) {
-        constraints += Constraint(
+    infix fun Expression.ge(other: Expression): Constraint {
+        val constraint = Constraint(
             left = this@ge,
             right = other,
             relationship = Relationship.GREATER_EQUALS,
         )
+        constraints += constraint
+        return constraint
     }
 
     // TODO: configure variable array operations!
 
     // Configure objective
 
-    infix fun Expression.to(goal: Goal) {
-        objective = Objective(
+    infix fun Expression.to(goal: Goal): Objective {
+        val newObjective = Objective(
             expression = this@to,
             goal = goal,
         )
+        objective = newObjective
+        return newObjective
     }
 
-    infix fun min(expression: Expression) {
-        objective = Objective(
+    infix fun min(expression: Expression): Objective {
+        val newObjective = Objective(
             expression = expression,
             goal = Goal.MIN,
         )
+        objective = newObjective
+        return newObjective
     }
 
-    infix fun max(expression: Expression) {
-        objective = Objective(
+    infix fun max(expression: Expression): Objective {
+        val newObjective = Objective(
             expression = expression,
             goal = Goal.MAX,
         )
+        objective = newObjective
+        return newObjective
     }
 
     // Number extensions for building expressions
@@ -201,10 +227,24 @@ class SolverConfigurationBuilder {
         )
     }
 
+    operator fun Number.minus(variable: Variable): LinearExpression {
+        return LinearExpression(
+            constant = toDouble(),
+            coefficients = mapOf(variable.name to -1.0),
+        )
+    }
+
     operator fun Number.minus(parameter: Parameter): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
             coefficients = mapOf(parameter.name to -parameter.coefficient),
+        )
+    }
+
+    operator fun Number.minus(expression: Expression): LinearExpression {
+        return LinearExpression(
+            constant = toDouble() - expression.constant,
+            coefficients = expression.coefficients.mapValues { -it.value },
         )
     }
 
@@ -214,17 +254,108 @@ class SolverConfigurationBuilder {
         if (constraints.isEmpty()) {
             throw IllegalStateException("At least one linear constraint configuration must be provided")
         }
+        if (variables.isEmpty()) {
+            throw IllegalStateException("At least one variable must be provided")
+        }
         if (objective == null) {
             throw IllegalStateException("Objective must be provided")
         }
         if (solver == null) {
             throw IllegalStateException("Choose solver")
         }
+
+        // load native libs once
+        Loader.loadNativeLibraries()
+
+        val solverInstance = MPSolver.createSolver(solver!!.name)
+            ?: throw IllegalStateException("Could not create solver of type: $solver")
+
+        val solverVariables = mutableMapOf<VariableName, MPVariable>()
+
+        for (variable in variables.values) {
+            when (variable) {
+                is IntegerVariable -> {
+                    solverVariables += variable.name to solverInstance.makeIntVar(
+                        variable.lowerBound,
+                        variable.upperBound,
+                        variable.name.value,
+                    )
+                }
+
+                is NumericVariable -> {
+                    solverVariables += variable.name to solverInstance.makeNumVar(
+                        variable.lowerBound,
+                        variable.upperBound,
+                        variable.name.value,
+                    )
+                }
+
+                is BooleanVariable -> {
+                    solverVariables += variable.name to solverInstance.makeBoolVar(
+                        variable.name.value,
+                    )
+                }
+            }
+        }
+
+        val solverConstraints = mutableListOf<MPConstraint>()
+
+        for (constraint in constraints) {
+            val expression = constraint.left - constraint.right
+            val constant = -expression.constant
+
+            val solverConstraint = when (constraint.relationship) {
+                Relationship.LESS_EQUALS -> {
+                    solverInstance.makeConstraint(
+                        Double.NEGATIVE_INFINITY,
+                        constant,
+                        // TODO: name?
+                    )
+                }
+
+                Relationship.EQUALS -> {
+                    solverInstance.makeConstraint(
+                        constant,
+                        constant,
+                        // TODO: name?
+                    )
+                }
+
+                Relationship.GREATER_EQUALS -> {
+                    solverInstance.makeConstraint(
+                        constant,
+                        Double.POSITIVE_INFINITY,
+                        // TODO: name?
+                    )
+                }
+            }
+
+            expression.coefficients
+                .mapKeys { (name, _) -> solverVariables[name] }
+                .forEach { (variable, coefficient) -> solverConstraint.setCoefficient(variable, coefficient) }
+
+            solverConstraints += solverConstraint
+        }
+
+        val solverObjective = solverInstance.objective()
+
+        objective?.goal?.let { goal ->
+            when (goal) {
+                Goal.MIN -> solverObjective.setMinimization()
+                Goal.MAX -> solverObjective.setMaximization()
+            }
+        }
+
+        objective?.expression
+            ?.coefficients
+            ?.mapKeys { (name, _) -> solverVariables[name] }
+            ?.forEach { (variable, coefficient) -> solverObjective.setCoefficient(variable, coefficient) }
+
         return SolverConfiguration(
-            solver = TODO(),
-            constraints = TODO(),
-            objective = TODO(),
-            variables = TODO(),
+            solver = solverInstance,
+            constraints = solverConstraints,
+            objective = solverObjective,
+            variables = solverVariables.values.toList(),
         )
     }
 }

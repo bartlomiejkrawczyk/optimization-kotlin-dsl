@@ -3,9 +3,17 @@ package io.github.bartlomiejkrawczyk.linearsolver.solver
 enum class SolverType {
     CLP_LINEAR_PROGRAMMING, CLP,
     CBC_MIXED_INTEGER_PROGRAMMING, CBC,
+
+    /**
+     * Recommended for linear programming.
+     */
     GLOP_LINEAR_PROGRAMMING, GLOP,
     BOP_INTEGER_PROGRAMMING, BOP,
     SAT_INTEGER_PROGRAMMING, SAT, CP_SAT,
+
+    /**
+     * Recommended for mixed integer programming.
+     */
     SCIP_MIXED_INTEGER_PROGRAMMING, SCIP,
     GUROBI_LINEAR_PROGRAMMING, GUROBI_LP,
     GUROBI_MIXED_INTEGER_PROGRAMMING, GUROBI, GUROBI_MIP,

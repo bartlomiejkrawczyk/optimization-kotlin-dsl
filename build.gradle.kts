@@ -47,7 +47,7 @@ configurations {
 dependencies {
     api("com.google.ortools:ortools-java:9.14.6206")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.0")
 }
 
 extensions.configure<PublishingExtension>("publishing") {

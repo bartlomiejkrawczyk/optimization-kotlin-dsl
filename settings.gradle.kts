@@ -1,6 +1,5 @@
 rootProject.name = "optimization-kotlin-dsl"
 
-
 pluginManagement {
     repositories {
         gradlePluginPortal()

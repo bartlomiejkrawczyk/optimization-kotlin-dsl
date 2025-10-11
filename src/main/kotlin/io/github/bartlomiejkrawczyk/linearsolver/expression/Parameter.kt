@@ -22,6 +22,18 @@ data class Parameter(
         )
     }
 
+    operator fun plus(variable: Variable): Expression {
+        if (variable.name == name) {
+            return copy(coefficient = coefficient + 1.0)
+        }
+        return LinearExpression(
+            coefficients = mapOf(
+                name to coefficient,
+                variable.name to 1.0,
+            ),
+        )
+    }
+
     operator fun plus(parameter: Parameter): Expression {
         if (parameter.name == name) {
             return copy(coefficient = coefficient + parameter.coefficient)
@@ -49,6 +61,18 @@ data class Parameter(
                 name to coefficient,
             ),
             constant = -number.toDouble(),
+        )
+    }
+
+    operator fun minus(variable: Variable): Expression {
+        if (variable.name == name) {
+            return copy(coefficient = coefficient - 1.0)
+        }
+        return LinearExpression(
+            coefficients = mapOf(
+                name to coefficient,
+                variable.name to -1.0,
+            ),
         )
     }
 

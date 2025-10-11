@@ -4,6 +4,7 @@ import com.google.ortools.Loader
 import com.google.ortools.linearsolver.MPConstraint
 import com.google.ortools.linearsolver.MPSolver
 import com.google.ortools.linearsolver.MPVariable
+import io.github.bartlomiejkrawczyk.linearsolver.OptimizerDslMarker
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
 import io.github.bartlomiejkrawczyk.linearsolver.expression.*
@@ -11,11 +12,12 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 
+@OptimizerDslMarker
 class SolverConfigurationBuilder {
 
     var tolerance: Double = 1e-7
 
-    var solver: SolverType? = null
+    var solver: SolverType? = SolverType.SCIP_MIXED_INTEGER_PROGRAMMING
 
     var sequence: Int = 1
 
@@ -246,6 +248,15 @@ class SolverConfigurationBuilder {
             constant = toDouble() - expression.constant,
             coefficients = expression.coefficients.mapValues { -it.value },
         )
+    }
+
+    // Collection extensions
+    fun <T : Expression> Array<T>.sum(): Expression {
+        return reduce<Expression, Expression> { a, b -> a + b }
+    }
+
+    fun <T : Expression> Collection<T>.sum(): Expression {
+        return reduce<Expression, Expression> { a, b -> a + b }
     }
 
     // Builder method

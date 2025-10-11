@@ -14,3 +14,6 @@ fun optimization(block: SolverConfigurationBuilder.() -> Unit): Pair<MPSolver.Re
     config.solver.verifySolution(/* tolerance= */ builder.tolerance, /* log_errors= */ true)
     return status to config
 }
+
+@DslMarker
+annotation class OptimizerDslMarker

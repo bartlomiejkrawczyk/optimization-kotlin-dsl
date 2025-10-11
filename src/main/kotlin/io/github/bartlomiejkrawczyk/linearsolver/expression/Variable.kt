@@ -26,6 +26,18 @@ interface Variable : Expression {
         )
     }
 
+    operator fun plus(variable: Variable): Expression {
+        if (variable.name == name) {
+            return Parameter(coefficient = 2.0, name = name)
+        }
+        return LinearExpression(
+            coefficients = mapOf(
+                name to 1.0,
+                variable.name to 1.0,
+            ),
+        )
+    }
+
     operator fun plus(parameter: Parameter): Expression {
         if (parameter.name == name) {
             return Parameter(coefficient = 1.0 + parameter.coefficient, name = name)
@@ -53,6 +65,18 @@ interface Variable : Expression {
                 name to 1.0,
             ),
             constant = -number.toDouble(),
+        )
+    }
+
+    operator fun minus(variable: Variable): Expression {
+        if (variable.name == name) {
+            return LinearExpression()
+        }
+        return LinearExpression(
+            coefficients = mapOf(
+                name to 1.0,
+                variable.name to -1.0,
+            ),
         )
     }
 

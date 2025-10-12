@@ -151,7 +151,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         name: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): Variable {
+    ): IntegerVariable {
         val variableName = name ?: "x${sequence++}"
         val variable = IntegerVariable(
             name = VariableName(variableName),
@@ -169,7 +169,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         name: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): Variable {
+    ): NumericVariable {
         val variableName = name ?: "x${sequence++}"
         val variable = NumericVariable(
             name = VariableName(variableName),
@@ -185,7 +185,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
 
     public fun boolVar(
         name: String? = null,
-    ): Variable {
+    ): BooleanVariable {
         val variableName = name ?: "x${sequence++}"
         val variable = BooleanVariable(
             name = VariableName(variableName),
@@ -200,7 +200,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     public fun <T> vectorBoolVar(
         vectorKeys: List<T>,
         namePrefix: String? = null,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, BooleanVariable> {
         return vectorVar(
             vectorKeys = vectorKeys,
             namePrefix = namePrefix,
@@ -217,7 +217,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         namePrefix: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, IntegerVariable> {
         return vectorVar(
             vectorKeys = vectorKeys,
             namePrefix = namePrefix,
@@ -236,7 +236,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         namePrefix: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, NumericVariable> {
         return vectorVar(
             vectorKeys = vectorKeys,
             namePrefix = namePrefix,
@@ -250,11 +250,11 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
-    public fun <T> vectorVar(
+    public fun <T, V : Variable> vectorVar(
         vectorKeys: List<T>,
         namePrefix: String? = null,
-        variableProvider: (String) -> Variable,
-    ): NamedTensor<T, Variable> {
+        variableProvider: (String) -> V,
+    ): NamedTensor<T, V> {
         return tensorVar(
             tensorKeys = listOf(vectorKeys),
             namePrefix = namePrefix,
@@ -265,7 +265,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     public fun <T> tensorBoolVar(
         tensorKeys: List<List<T>>,
         namePrefix: String? = null,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, BooleanVariable> {
         return tensorVar(
             tensorKeys = tensorKeys,
             namePrefix = namePrefix,
@@ -282,7 +282,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         namePrefix: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, IntegerVariable> {
         return tensorVar(
             tensorKeys = tensorKeys,
             namePrefix = namePrefix,
@@ -301,7 +301,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         namePrefix: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, NumericVariable> {
         return tensorVar(
             tensorKeys = tensorKeys,
             namePrefix = namePrefix,
@@ -316,11 +316,11 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     }
 
     @Suppress("UNCHECKED_CAST")
-    public fun <T> tensorVar(
+    public fun <T, V : Variable> tensorVar(
         tensorKeys: List<List<T>>,
         namePrefix: String? = null,
-        variableProvider: (String) -> Variable,
-    ): NamedTensor<T, Variable> {
+        variableProvider: (String) -> V,
+    ): NamedTensor<T, V> {
         val tensorVariables = mutableMapOf<T, Any>()
 
         for (tuple in cartesianProduct(tensorKeys)) {

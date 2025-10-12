@@ -33,6 +33,14 @@ class MixedIntegerProblemTest {
             }
 
             variables.sum() le y
+
+            "Named constraint - y greater than x" {
+                y ge x
+            }
+
+            "5y = 2(x + 3)" {
+                5 * y eq 2 * (x + 3)
+            }
         }
 
         println("OBJECTIVE")
@@ -41,6 +49,11 @@ class MixedIntegerProblemTest {
         println("VARIABLES")
         config.variables.forEach { variable ->
             println("${variable.name()} = ${variable.solutionValue()}")
+        }
+
+        println("CONSTRAINTS")
+        config.constraints.forEach { constraint ->
+            println("${constraint.name()} = ${constraint.dualValue()}")
         }
 
         Assertions.assertEquals(

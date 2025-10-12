@@ -7,13 +7,83 @@ import com.google.ortools.linearsolver.MPVariable
 import io.github.bartlomiejkrawczyk.linearsolver.OptimizerDslMarker
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
+import io.github.bartlomiejkrawczyk.linearsolver.constraint.StringConstraintBuilder
 import io.github.bartlomiejkrawczyk.linearsolver.expression.*
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 
+interface OptimizerExtensions {
+    // Number extensions for building expressions
+
+    infix fun Number.x(variable: Variable) = Parameter(coefficient = toDouble(), name = variable.name)
+
+    operator fun Number.times(variable: Variable): Parameter =
+        Parameter(coefficient = toDouble(), name = variable.name)
+
+    operator fun Number.times(parameter: Parameter): Parameter =
+        Parameter(coefficient = parameter.coefficient * toDouble(), name = parameter.name)
+
+    operator fun Number.times(expression: Expression): LinearExpression =
+        LinearExpression(
+            constant = expression.constant * toDouble(),
+            coefficients = expression.coefficients.mapValues { it.value * toDouble() },
+        )
+
+    operator fun Number.plus(variable: Variable): LinearExpression {
+        return LinearExpression(
+            constant = toDouble(),
+            coefficients = mapOf(variable.name to 1.0),
+        )
+    }
+
+    operator fun Number.plus(parameter: Parameter): LinearExpression {
+        return LinearExpression(
+            constant = toDouble(),
+            coefficients = mapOf(parameter.name to parameter.coefficient),
+        )
+    }
+
+    operator fun Number.plus(expression: Expression): LinearExpression {
+        return LinearExpression(
+            constant = expression.constant + toDouble(),
+            coefficients = expression.coefficients,
+        )
+    }
+
+    operator fun Number.minus(variable: Variable): LinearExpression {
+        return LinearExpression(
+            constant = toDouble(),
+            coefficients = mapOf(variable.name to -1.0),
+        )
+    }
+
+    operator fun Number.minus(parameter: Parameter): LinearExpression {
+        return LinearExpression(
+            constant = toDouble(),
+            coefficients = mapOf(parameter.name to -parameter.coefficient),
+        )
+    }
+
+    operator fun Number.minus(expression: Expression): LinearExpression {
+        return LinearExpression(
+            constant = toDouble() - expression.constant,
+            coefficients = expression.coefficients.mapValues { -it.value },
+        )
+    }
+
+    // Collection extensions
+    fun <T : Expression> Array<T>.sum(): Expression {
+        return reduce<Expression, Expression> { a, b -> a + b }
+    }
+
+    fun <T : Expression> Collection<T>.sum(): Expression {
+        return reduce<Expression, Expression> { a, b -> a + b }
+    }
+}
+
 @OptimizerDslMarker
-class SolverConfigurationBuilder {
+class SolverConfigurationBuilder : OptimizerExtensions {
 
     var tolerance: Double = 1e-7
 
@@ -34,7 +104,7 @@ class SolverConfigurationBuilder {
     // Define variables
 
     fun intVar(
-        name: String?,
+        name: String? = null,
         lowerBound: Double = Double.NEGATIVE_INFINITY,
         upperBound: Double = Double.POSITIVE_INFINITY,
     ): Variable {
@@ -52,7 +122,7 @@ class SolverConfigurationBuilder {
     }
 
     fun numVar(
-        name: String?,
+        name: String? = null,
         lowerBound: Double = Double.NEGATIVE_INFINITY,
         upperBound: Double = Double.POSITIVE_INFINITY,
     ): Variable {
@@ -70,7 +140,7 @@ class SolverConfigurationBuilder {
     }
 
     fun boolVar(
-        name: String?,
+        name: String? = null,
     ): Variable {
         val variableName = name ?: "x${sequence++}"
         val variable = BooleanVariable(
@@ -84,8 +154,16 @@ class SolverConfigurationBuilder {
     }
 
     // TODO: configure array of variables
+    // TODO: may add boolean operations on bool variables - eg. and, or, oneOf, allOf, nOf etc.
 
     // Configure constraints
+
+    operator fun String.invoke(block: StringConstraintBuilder.() -> Constraint): Constraint {
+        val builder = StringConstraintBuilder(this)
+        val constraint = builder.block()
+        constraints += constraint
+        return constraint
+    }
 
     fun constraint(
         left: Expression,
@@ -192,72 +270,6 @@ class SolverConfigurationBuilder {
         return newObjective
     }
 
-    // Number extensions for building expressions
-
-    infix fun Number.x(variable: Variable) = Parameter(coefficient = toDouble(), name = variable.name)
-
-    operator fun Number.times(variable: Variable): Parameter =
-        Parameter(coefficient = toDouble(), name = variable.name)
-
-    operator fun Number.times(parameter: Parameter): Parameter =
-        Parameter(coefficient = parameter.coefficient * toDouble(), name = parameter.name)
-
-    operator fun Number.times(expression: Expression): LinearExpression =
-        LinearExpression(
-            constant = expression.constant * toDouble(),
-            coefficients = expression.coefficients.mapValues { it.value * toDouble() },
-        )
-
-    operator fun Number.plus(variable: Variable): LinearExpression {
-        return LinearExpression(
-            constant = toDouble(),
-            coefficients = mapOf(variable.name to 1.0),
-        )
-    }
-
-    operator fun Number.plus(parameter: Parameter): LinearExpression {
-        return LinearExpression(
-            constant = toDouble(),
-            coefficients = mapOf(parameter.name to parameter.coefficient),
-        )
-    }
-
-    operator fun Number.plus(expression: Expression): LinearExpression {
-        return LinearExpression(
-            constant = expression.constant + toDouble(),
-            coefficients = expression.coefficients,
-        )
-    }
-
-    operator fun Number.minus(variable: Variable): LinearExpression {
-        return LinearExpression(
-            constant = toDouble(),
-            coefficients = mapOf(variable.name to -1.0),
-        )
-    }
-
-    operator fun Number.minus(parameter: Parameter): LinearExpression {
-        return LinearExpression(
-            constant = toDouble(),
-            coefficients = mapOf(parameter.name to -parameter.coefficient),
-        )
-    }
-
-    operator fun Number.minus(expression: Expression): LinearExpression {
-        return LinearExpression(
-            constant = toDouble() - expression.constant,
-            coefficients = expression.coefficients.mapValues { -it.value },
-        )
-    }
-
-    // Collection extensions
-    fun <T : Expression> Array<T>.sum(): Expression {
-        return reduce<Expression, Expression> { a, b -> a + b }
-    }
-
-    fun <T : Expression> Collection<T>.sum(): Expression {
-        return reduce<Expression, Expression> { a, b -> a + b }
-    }
 
     // Builder method
 
@@ -315,30 +327,25 @@ class SolverConfigurationBuilder {
             val expression = constraint.left - constraint.right
             val constant = -expression.constant
 
-            val solverConstraint = when (constraint.relationship) {
-                Relationship.LESS_EQUALS -> {
-                    solverInstance.makeConstraint(
-                        Double.NEGATIVE_INFINITY,
-                        constant,
-                        // TODO: name?
-                    )
-                }
+            var lowerBound = constant
+            var upperBound = constant
 
-                Relationship.EQUALS -> {
-                    solverInstance.makeConstraint(
-                        constant,
-                        constant,
-                        // TODO: name?
-                    )
+            when (constraint.relationship) {
+                Relationship.LESS_EQUALS -> {
+                    lowerBound = Double.NEGATIVE_INFINITY
                 }
 
                 Relationship.GREATER_EQUALS -> {
-                    solverInstance.makeConstraint(
-                        constant,
-                        Double.POSITIVE_INFINITY,
-                        // TODO: name?
-                    )
+                    upperBound = Double.POSITIVE_INFINITY
                 }
+
+                else -> {}
+            }
+
+            val solverConstraint = if (constraint.name != null) {
+                solverInstance.makeConstraint(lowerBound, upperBound, constraint.name)
+            } else {
+                solverInstance.makeConstraint(lowerBound, upperBound)
             }
 
             expression.coefficients

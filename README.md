@@ -8,7 +8,7 @@
 
 ## Overview
 
-**Optimization Kotlin DSL** is a lightweight and expressive Kotlin Domain-Specific Language (DSL) for defining and
+**Optimization Kotlin DSL** is a expressive Kotlin Domain-Specific Language (DSL) for defining and
 solving optimization problems using [Google OR-Tools](https://developers.google.com/optimization).  
 It simplifies model creation by providing idiomatic Kotlin syntax while supporting:
 
@@ -78,7 +78,7 @@ Add the dependency to your **Maven** or **Gradle** project.
 <dependency>
     <groupId>io.github.bartlomiejkrawczyk</groupId>
     <artifactId>optimization-kotlin-dsl</artifactId>
-    <version>0.1.0</version>
+    <version>${version}</version>
 </dependency>
 ```
 
@@ -86,7 +86,7 @@ Add the dependency to your **Maven** or **Gradle** project.
 
 ```kotlin
 dependencies {
-    implementation("io.github.bartlomiejkrawczyk:optimization-kotlin-dsl:0.1.0")
+    implementation("io.github.bartlomiejkrawczyk:optimization-kotlin-dsl:${version}")
 }
 ```
 

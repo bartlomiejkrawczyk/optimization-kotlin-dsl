@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import java.time.Duration
 
 plugins {
@@ -7,6 +8,7 @@ plugins {
     id("maven-publish")
     id("com.coditory.manifest") version "1.1.0"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
 }
 
 group = "io.github.bartlomiejkrawczyk"
@@ -16,7 +18,10 @@ kotlin {
     jvmToolchain(17)
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict")
+        apiVersion.set(KotlinVersion.KOTLIN_2_1)
+        languageVersion.set(KotlinVersion.KOTLIN_2_1)
     }
+    explicitApi()
 }
 
 java {

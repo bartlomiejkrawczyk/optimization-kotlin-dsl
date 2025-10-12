@@ -22,6 +22,16 @@ class MixedIntegerProblemTest {
             // OBJECTIVE
             x * 2 + y * 3 + 4 * z to Goal.MAX
 
+            // or
+            objective {
+                x * 2 + y * 3 + 4 * z to Goal.MAX
+            }
+
+            // or
+            max {
+                x * 2 + y * 3 + 4 * z
+            }
+
             // CONSTRAINTS
             x + y le 3
             y - 1 le 2
@@ -32,7 +42,17 @@ class MixedIntegerProblemTest {
                 variable le 1.5
             }
 
-            variables.sum() le y
+            constraint {
+                variables.sum() le y
+            }
+
+            "Named constraint - y greater than x" {
+                y ge x
+            }
+
+            "5y = 2(x + 3)" {
+                5 * y eq 2 * (x + 3)
+            }
         }
 
         println("OBJECTIVE")
@@ -41,6 +61,11 @@ class MixedIntegerProblemTest {
         println("VARIABLES")
         config.variables.forEach { variable ->
             println("${variable.name()} = ${variable.solutionValue()}")
+        }
+
+        println("CONSTRAINTS")
+        config.constraints.forEach { constraint ->
+            println("${constraint.name()} = ${constraint.dualValue()}")
         }
 
         Assertions.assertEquals(

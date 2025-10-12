@@ -4,7 +4,7 @@ import com.google.ortools.linearsolver.MPSolver
 import io.github.bartlomiejkrawczyk.linearsolver.model.SolverConfiguration
 import io.github.bartlomiejkrawczyk.linearsolver.model.SolverConfigurationBuilder
 
-fun optimization(block: SolverConfigurationBuilder.() -> Unit): Pair<MPSolver.ResultStatus, SolverConfiguration> {
+public fun optimization(block: SolverConfigurationBuilder.() -> Unit): Pair<MPSolver.ResultStatus, SolverConfiguration> {
     val builder = SolverConfigurationBuilder()
     builder.block()
     val config = builder.build()
@@ -16,4 +16,4 @@ fun optimization(block: SolverConfigurationBuilder.() -> Unit): Pair<MPSolver.Re
 }
 
 @DslMarker
-annotation class OptimizerDslMarker
+public annotation class OptimizerDslMarker

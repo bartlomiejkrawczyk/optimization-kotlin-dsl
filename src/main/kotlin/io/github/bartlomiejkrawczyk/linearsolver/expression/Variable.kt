@@ -3,21 +3,26 @@ package io.github.bartlomiejkrawczyk.linearsolver.expression
 import java.io.Serializable
 
 @JvmInline
-value class VariableName(val value: String) : Serializable
+public value class VariableName(public val value: String) : Serializable
 
-interface Variable : Expression {
-    val name: VariableName
+public interface Variable : Expression {
+    public val name: VariableName
 
     override val coefficients: Map<VariableName, Double>
         get() = mapOf(name to 1.0)
 
     override operator fun unaryMinus(): Parameter = Parameter(name, -1.0)
 
-    operator fun times(coefficient: Double): Parameter {
-        return Parameter(this.name, coefficient)
+    // TODO: may optimize multiplication by 0
+    override operator fun times(number: Number): Parameter {
+        return Parameter(this.name, number.toDouble())
     }
 
-    operator fun plus(number: Number): LinearExpression {
+    override operator fun div(number: Number): Parameter {
+        return Parameter(this.name, 1.0 / number.toDouble())
+    }
+
+    public operator fun plus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(
                 name to 1.0,
@@ -26,7 +31,7 @@ interface Variable : Expression {
         )
     }
 
-    operator fun plus(variable: Variable): Expression {
+    public operator fun plus(variable: Variable): Expression {
         if (variable.name == name) {
             return Parameter(coefficient = 2.0, name = name)
         }
@@ -38,7 +43,7 @@ interface Variable : Expression {
         )
     }
 
-    operator fun plus(parameter: Parameter): Expression {
+    public operator fun plus(parameter: Parameter): Expression {
         if (parameter.name == name) {
             return Parameter(coefficient = 1.0 + parameter.coefficient, name = name)
         }
@@ -59,7 +64,7 @@ interface Variable : Expression {
         )
     }
 
-    operator fun minus(number: Number): LinearExpression {
+    public operator fun minus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(
                 name to 1.0,
@@ -68,7 +73,7 @@ interface Variable : Expression {
         )
     }
 
-    operator fun minus(variable: Variable): Expression {
+    public operator fun minus(variable: Variable): Expression {
         if (variable.name == name) {
             return LinearExpression()
         }
@@ -80,7 +85,7 @@ interface Variable : Expression {
         )
     }
 
-    operator fun minus(parameter: Parameter): Expression {
+    public operator fun minus(parameter: Parameter): Expression {
         if (parameter.name == name) {
             return Parameter(coefficient = 1.0 + parameter.coefficient, name = name)
         }
@@ -104,18 +109,18 @@ interface Variable : Expression {
     }
 }
 
-open class BooleanVariable(
+public open class BooleanVariable(
     override val name: VariableName,
 ) : Variable
 
-open class IntegerVariable(
+public open class IntegerVariable(
     override val name: VariableName,
-    val lowerBound: Double = Double.NEGATIVE_INFINITY,
-    val upperBound: Double = Double.POSITIVE_INFINITY,
+    public val lowerBound: Double = Double.NEGATIVE_INFINITY,
+    public val upperBound: Double = Double.POSITIVE_INFINITY,
 ) : Variable
 
-open class NumericVariable(
+public open class NumericVariable(
     override val name: VariableName,
-    val lowerBound: Double = Double.NEGATIVE_INFINITY,
-    val upperBound: Double = Double.POSITIVE_INFINITY,
+    public val lowerBound: Double = Double.NEGATIVE_INFINITY,
+    public val upperBound: Double = Double.POSITIVE_INFINITY,
 ) : Variable

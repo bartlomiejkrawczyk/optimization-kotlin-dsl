@@ -19,6 +19,12 @@ interface Expression {
             constant * number.toDouble()
         )
 
+    operator fun div(number: Number): Expression =
+        LinearExpression(
+            coefficients.mapValues { it.value / number.toDouble() },
+            constant / number.toDouble()
+        )
+
     operator fun plus(expression: Expression): LinearExpression {
         val rightCoefficients = expression.coefficients
         val newCoefficients = coefficients.toMutableMap()

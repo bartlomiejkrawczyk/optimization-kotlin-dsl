@@ -13,6 +13,9 @@ data class Parameter(
     override operator fun times(number: Number): Parameter =
         copy(coefficient = coefficient * number.toDouble())
 
+    override operator fun div(number: Number): Parameter =
+        copy(coefficient = coefficient / number.toDouble())
+
     operator fun plus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(

@@ -13,8 +13,12 @@ interface Variable : Expression {
 
     override operator fun unaryMinus(): Parameter = Parameter(name, -1.0)
 
-    operator fun times(coefficient: Double): Parameter {
-        return Parameter(this.name, coefficient)
+    override operator fun times(number: Number): Parameter {
+        return Parameter(this.name, number.toDouble())
+    }
+
+    override operator fun div(number: Number): Parameter {
+        return Parameter(this.name, 1.0 / number.toDouble())
     }
 
     operator fun plus(number: Number): LinearExpression {

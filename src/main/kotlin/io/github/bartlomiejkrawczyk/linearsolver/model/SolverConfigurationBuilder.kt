@@ -14,6 +14,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
 import io.github.bartlomiejkrawczyk.linearsolver.objective.ObjectiveBuilder
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 
+@Suppress("INAPPLICABLE_JVM_NAME")
 public interface OptimizerExtensions {
     // Number extensions for building expressions
 
@@ -74,17 +75,45 @@ public interface OptimizerExtensions {
     }
 
     // Collection extensions
+    @JvmName("sumArray")
+    public fun <T : Expression> sum(vararg expressions: T): Expression {
+        return expressions.reduce<Expression, Expression> { a, b -> a + b }
+    }
+
+    @JvmName("sumIterable")
+    public fun <T : Expression> sum(expressions: Iterable<T>): Expression {
+        return expressions.reduce<Expression, Expression> { a, b -> a + b }
+    }
+
     public fun <T : Expression> Array<T>.sum(): Expression {
         return reduce<Expression, Expression> { a, b -> a + b }
     }
 
-    public fun <T : Expression> Collection<T>.sum(): Expression {
+    public fun <T : Expression> Iterable<T>.sum(): Expression {
         return reduce<Expression, Expression> { a, b -> a + b }
     }
 
-    // TODO: average!
+    @JvmName("avgArray")
+    public fun <T : Expression> avg(vararg expressions: T): Expression {
+        return expressions.sum() / expressions.size
+    }
+
+    @JvmName("avgCollection")
+    public fun <T : Expression> avg(expressions: Collection<T>): Expression {
+        return expressions.sum() / expressions.size
+    }
+
+    public fun <T : Expression> Array<T>.avg(): Expression {
+        return sum() / size
+    }
+
+    public fun <T : Expression> Collection<T>.avg(): Expression {
+        return sum() / size
+    }
+
     // TODO: maxmin?
     // TODO: minmax?
+    // TODO: absolute?
 }
 
 @OptimizerDslMarker

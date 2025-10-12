@@ -27,6 +27,11 @@ class MixedIntegerProblemTest {
                 x * 2 + y * 3 + 4 * z to Goal.MAX
             }
 
+            // or
+            max {
+                x * 2 + y * 3 + 4 * z
+            }
+
             // CONSTRAINTS
             x + y le 3
             y - 1 le 2

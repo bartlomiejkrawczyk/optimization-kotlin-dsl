@@ -6,8 +6,8 @@ import com.google.ortools.linearsolver.MPSolver
 import com.google.ortools.linearsolver.MPVariable
 import io.github.bartlomiejkrawczyk.linearsolver.OptimizerDslMarker
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
-import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.ConstraintBuilder
+import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
 import io.github.bartlomiejkrawczyk.linearsolver.expression.*
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
@@ -283,6 +283,22 @@ public class SolverConfigurationBuilder : OptimizerExtensions {
     // TODO: configure variable array operations!
 
     // Configure objective
+
+    public fun min(block: OptimizerExtensions.() -> Expression): Objective {
+        val builder = ObjectiveBuilder()
+        val expression = builder.block()
+        val newObjective = expression to Goal.MIN
+        objective = newObjective
+        return newObjective
+    }
+
+    public fun max(block: OptimizerExtensions.() -> Expression): Objective {
+        val builder = ObjectiveBuilder()
+        val expression = builder.block()
+        val newObjective = expression to Goal.MAX
+        objective = newObjective
+        return newObjective
+    }
 
     public fun objective(block: ObjectiveBuilder.() -> Objective): Objective {
         val builder = ObjectiveBuilder()

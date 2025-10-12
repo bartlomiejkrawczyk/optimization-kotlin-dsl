@@ -178,5 +178,6 @@ Issues, suggestions, and improvements are highly appreciated.
 ## Links
 
 - [Google OR-Tools Documentation](https://developers.google.com/optimization)
+- [Google OR-Tools Repository](https://github.com/google/or-tools)
 - [Kotlin DSL Reference](https://kotlinlang.org/docs/type-safe-builders.html)
 - [Project Repository](https://github.com/bartlomiejkrawczyk/optimization-kotlin-dsl)

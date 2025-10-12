@@ -63,11 +63,6 @@ class MixedIntegerProblemTest {
             println("${variable.name()} = ${variable.solutionValue()}")
         }
 
-        println("CONSTRAINTS")
-        config.constraints.forEach { constraint ->
-            println("${constraint.name()} = ${constraint.dualValue()}")
-        }
-
         Assertions.assertEquals(
             MPSolver.ResultStatus.OPTIMAL,
             status,

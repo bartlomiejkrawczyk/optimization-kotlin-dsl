@@ -10,7 +10,7 @@ class MixedIntegerProblemTest {
 
     @Test
     fun `optimization problem should be optimal`() {
-        val (status, config) = optimization {
+        val solution = optimization {
             solver(SolverType.SCIP_MIXED_INTEGER_PROGRAMMING)
 
             val x = intVar("x")
@@ -55,6 +55,8 @@ class MixedIntegerProblemTest {
             }
         }
 
+        val (status, config) = solution
+
         println("OBJECTIVE")
         println("Optimal objective value = ${config.objective.value()}")
 
@@ -62,6 +64,8 @@ class MixedIntegerProblemTest {
         config.variables.forEach { variable ->
             println("${variable.name()} = ${variable.solutionValue()}")
         }
+
+        println(solution.exportModelAsLpFormat())
 
         Assertions.assertEquals(
             MPSolver.ResultStatus.OPTIMAL,

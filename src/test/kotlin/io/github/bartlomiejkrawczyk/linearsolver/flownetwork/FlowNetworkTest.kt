@@ -93,7 +93,7 @@ class FlowNetworkTest {
 
     @Test
     fun `optimize flow network - min cost`() {
-        val (status, config) = optimization {
+        val solution = optimization {
             solver(SolverType.GLOP_LINEAR_PROGRAMMING)
 
             val totalCost = numVar("totalCost", lowerBound = 0.0)
@@ -134,6 +134,7 @@ class FlowNetworkTest {
                 }
             }
         }
+        val (status, config) = solution
 
         println("OBJECTIVE")
         println("Optimal objective value = ${config.objective.value()}")
@@ -143,10 +144,7 @@ class FlowNetworkTest {
             println("${variable.name()} = ${variable.solutionValue()}")
         }
 
-        println("CONSTRAINTS")
-        config.constraints.forEach { constraint ->
-            println("${constraint.name()} = ${constraint.dualValue()}")
-        }
+        println(solution.exportModelAsLpFormat())
 
         Assertions.assertEquals(
             MPSolver.ResultStatus.OPTIMAL,
@@ -201,7 +199,7 @@ class FlowNetworkTest {
 
     @Test
     fun `optimize flow network - max total flow`() {
-        val (status, config) = optimization {
+        val solution = optimization {
             solver(SolverType.GLOP_LINEAR_PROGRAMMING)
 
             val totalFlow = numVar("totalFlow", lowerBound = 0.0)
@@ -234,6 +232,7 @@ class FlowNetworkTest {
                 }
             }
         }
+        val (status, config) = solution
 
         println("OBJECTIVE")
         println("Optimal objective value = ${config.objective.value()}")
@@ -243,10 +242,7 @@ class FlowNetworkTest {
             println("${variable.name()} = ${variable.solutionValue()}")
         }
 
-        println("CONSTRAINTS")
-        config.constraints.forEach { constraint ->
-            println("${constraint.name()} = ${constraint.dualValue()}")
-        }
+        println(solution.exportModelAsLpFormat())
 
         Assertions.assertEquals(
             MPSolver.ResultStatus.OPTIMAL,

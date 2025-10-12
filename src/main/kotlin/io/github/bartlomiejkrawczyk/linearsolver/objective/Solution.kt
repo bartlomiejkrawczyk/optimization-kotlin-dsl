@@ -13,4 +13,7 @@ public data class Solution(
 
     val objectiveValue: Double
         get() = config.objective.value()
+
+    public fun exportModelAsLpFormat(): String =
+        config.solver.exportModelAsLpFormat()
 }

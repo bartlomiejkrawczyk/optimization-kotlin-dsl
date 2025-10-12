@@ -18,6 +18,10 @@ import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 public interface OptimizerExtensions {
     // Number extensions for building expressions
 
+    public infix fun Number.x(value: Int): Parameter = Parameter(coefficient = toDouble(), name = VariableName("x$value"))
+
+    public infix fun Number.x(name: String): Parameter = Parameter(coefficient = toDouble(), name = VariableName(name))
+
     public infix fun Number.x(variable: Variable): Parameter = Parameter(coefficient = toDouble(), name = variable.name)
 
     public operator fun Number.times(variable: Variable): Parameter =

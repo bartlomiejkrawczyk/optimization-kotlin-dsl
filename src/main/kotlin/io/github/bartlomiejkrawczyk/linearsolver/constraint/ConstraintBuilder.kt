@@ -6,8 +6,8 @@ import io.github.bartlomiejkrawczyk.linearsolver.expression.LinearExpression
 import io.github.bartlomiejkrawczyk.linearsolver.model.OptimizerExtensions
 
 @OptimizerDslMarker
-public class StringConstraintBuilder(
-    private val name: String,
+public class ConstraintBuilder(
+    private val name: String? = null,
 ) : OptimizerExtensions {
 
     public infix fun Expression.le(value: Number): Constraint {

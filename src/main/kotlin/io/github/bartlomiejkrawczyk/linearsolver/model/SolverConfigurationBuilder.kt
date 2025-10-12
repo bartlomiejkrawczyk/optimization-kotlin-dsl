@@ -7,7 +7,7 @@ import com.google.ortools.linearsolver.MPVariable
 import io.github.bartlomiejkrawczyk.linearsolver.OptimizerDslMarker
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Constraint
 import io.github.bartlomiejkrawczyk.linearsolver.constraint.Relationship
-import io.github.bartlomiejkrawczyk.linearsolver.constraint.StringConstraintBuilder
+import io.github.bartlomiejkrawczyk.linearsolver.constraint.ConstraintBuilder
 import io.github.bartlomiejkrawczyk.linearsolver.expression.*
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
@@ -192,8 +192,15 @@ public class SolverConfigurationBuilder : OptimizerExtensions {
 
     // Configure constraints
 
-    public operator fun String.invoke(block: StringConstraintBuilder.() -> Constraint): Constraint {
-        val builder = StringConstraintBuilder(this)
+    public fun constraint(block: ConstraintBuilder.() -> Constraint): Constraint {
+        val builder = ConstraintBuilder()
+        val constraint = builder.block()
+        constraints += constraint
+        return constraint
+    }
+
+    public operator fun String.invoke(block: ConstraintBuilder.() -> Constraint): Constraint {
+        val builder = ConstraintBuilder(this)
         val constraint = builder.block()
         constraints += constraint
         return constraint

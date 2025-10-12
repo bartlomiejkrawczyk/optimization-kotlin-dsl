@@ -22,6 +22,11 @@ class MixedIntegerProblemTest {
             // OBJECTIVE
             x * 2 + y * 3 + 4 * z to Goal.MAX
 
+            // or
+            objective {
+                x * 2 + y * 3 + 4 * z to Goal.MAX
+            }
+
             // CONSTRAINTS
             x + y le 3
             y - 1 le 2
@@ -32,7 +37,9 @@ class MixedIntegerProblemTest {
                 variable le 1.5
             }
 
-            variables.sum() le y
+            constraint {
+                variables.sum() le y
+            }
 
             "Named constraint - y greater than x" {
                 y ge x

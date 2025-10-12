@@ -16,7 +16,7 @@ public data class Parameter(
     override operator fun div(number: Number): Parameter =
         copy(coefficient = coefficient / number.toDouble())
 
-    public operator fun plus(number: Number): LinearExpression {
+    public override operator fun plus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(
                 name to coefficient,
@@ -58,7 +58,7 @@ public data class Parameter(
         )
     }
 
-    public operator fun minus(number: Number): LinearExpression {
+    public override operator fun minus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(
                 name to coefficient,

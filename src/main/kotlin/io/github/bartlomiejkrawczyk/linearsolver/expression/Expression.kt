@@ -25,6 +25,13 @@ public interface Expression {
             constant / number.toDouble()
         )
 
+    public operator fun plus(number: Number): LinearExpression {
+        return LinearExpression(
+            coefficients = coefficients,
+            constant = constant + number.toDouble(),
+        )
+    }
+
     public operator fun plus(expression: Expression): LinearExpression {
         val rightCoefficients = expression.coefficients
         val newCoefficients = coefficients.toMutableMap()
@@ -34,6 +41,13 @@ public interface Expression {
         return LinearExpression(
             coefficients = newCoefficients,
             constant = constant + expression.constant,
+        )
+    }
+
+    public operator fun minus(number: Number): LinearExpression {
+        return LinearExpression(
+            coefficients = coefficients,
+            constant = constant - number.toDouble(),
         )
     }
 

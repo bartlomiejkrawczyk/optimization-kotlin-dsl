@@ -599,7 +599,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
      *
      * Example:
      * ```kotlin
-     * val y = tensorIntVar(listOf(listOf("i1", "i2"), listOf("j1", "j2")), namePrefix = "y")
+     * val y = tensorNumVar(listOf(listOf("i1", "i2"), listOf("j1", "j2")), namePrefix = "y")
      * // -> y_i1_j1, y_i1_j2,
      * //    y_i2_j1, y_i2_j2
      * ```

@@ -13,6 +13,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
 import io.github.bartlomiejkrawczyk.linearsolver.objective.ObjectiveBuilder
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
+import io.github.bartlomiejkrawczyk.linearsolver.tensor.NamedTensor
 
 @Suppress("INAPPLICABLE_JVM_NAME")
 public interface OptimizerExtensions {
@@ -119,6 +120,12 @@ public interface OptimizerExtensions {
     }
 }
 
+public fun <T> cartesianProduct(lists: List<List<T>>): Sequence<List<T>> {
+    return lists.fold(sequenceOf(emptyList())) { acc, list ->
+        acc.flatMap { partial -> list.asSequence().map { element -> partial + element } }
+    }
+}
+
 @OptimizerDslMarker
 public open class SolverConfigurationBuilder : OptimizerExtensions {
 
@@ -188,6 +195,152 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         }
         variables[variable.name] = variable
         return variable
+    }
+
+    public fun <T> vectorBoolVar(
+        vectorKeys: List<T>,
+        namePrefix: String? = null,
+    ): NamedTensor<T, Variable> {
+        return vectorVar(
+            vectorKeys = vectorKeys,
+            namePrefix = namePrefix,
+            variableProvider = { name ->
+                boolVar(
+                    name = name,
+                )
+            }
+        )
+    }
+
+    public fun <T> vectorIntVar(
+        vectorKeys: List<T>,
+        namePrefix: String? = null,
+        lowerBound: Number = Double.NEGATIVE_INFINITY,
+        upperBound: Number = Double.POSITIVE_INFINITY,
+    ): NamedTensor<T, Variable> {
+        return vectorVar(
+            vectorKeys = vectorKeys,
+            namePrefix = namePrefix,
+            variableProvider = { name ->
+                intVar(
+                    name = name,
+                    lowerBound = lowerBound,
+                    upperBound = upperBound,
+                )
+            }
+        )
+    }
+
+    public fun <T> vectorNumVar(
+        vectorKeys: List<T>,
+        namePrefix: String? = null,
+        lowerBound: Number = Double.NEGATIVE_INFINITY,
+        upperBound: Number = Double.POSITIVE_INFINITY,
+    ): NamedTensor<T, Variable> {
+        return vectorVar(
+            vectorKeys = vectorKeys,
+            namePrefix = namePrefix,
+            variableProvider = { name ->
+                numVar(
+                    name = name,
+                    lowerBound = lowerBound,
+                    upperBound = upperBound,
+                )
+            }
+        )
+    }
+
+    public fun <T> vectorVar(
+        vectorKeys: List<T>,
+        namePrefix: String? = null,
+        variableProvider: (String) -> Variable,
+    ): NamedTensor<T, Variable> {
+        return tensorVar(
+            tensorKeys = listOf(vectorKeys),
+            namePrefix = namePrefix,
+            variableProvider = variableProvider,
+        )
+    }
+
+    public fun <T> tensorBoolVar(
+        tensorKeys: List<List<T>>,
+        namePrefix: String? = null,
+    ): NamedTensor<T, Variable> {
+        return tensorVar(
+            tensorKeys = tensorKeys,
+            namePrefix = namePrefix,
+            variableProvider = { name ->
+                boolVar(
+                    name = name,
+                )
+            }
+        )
+    }
+
+    public fun <T> tensorIntVar(
+        tensorKeys: List<List<T>>,
+        namePrefix: String? = null,
+        lowerBound: Number = Double.NEGATIVE_INFINITY,
+        upperBound: Number = Double.POSITIVE_INFINITY,
+    ): NamedTensor<T, Variable> {
+        return tensorVar(
+            tensorKeys = tensorKeys,
+            namePrefix = namePrefix,
+            variableProvider = { name ->
+                intVar(
+                    name = name,
+                    lowerBound = lowerBound,
+                    upperBound = upperBound,
+                )
+            }
+        )
+    }
+
+    public fun <T> tensorNumVar(
+        tensorKeys: List<List<T>>,
+        namePrefix: String? = null,
+        lowerBound: Number = Double.NEGATIVE_INFINITY,
+        upperBound: Number = Double.POSITIVE_INFINITY,
+    ): NamedTensor<T, Variable> {
+        return tensorVar(
+            tensorKeys = tensorKeys,
+            namePrefix = namePrefix,
+            variableProvider = { name ->
+                numVar(
+                    name = name,
+                    lowerBound = lowerBound,
+                    upperBound = upperBound,
+                )
+            }
+        )
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    public fun <T> tensorVar(
+        tensorKeys: List<List<T>>,
+        namePrefix: String? = null,
+        variableProvider: (String) -> Variable,
+    ): NamedTensor<T, Variable> {
+        val tensorVariables = mutableMapOf<T, Any>()
+
+        for (tuple in cartesianProduct(tensorKeys)) {
+            val variableName = (namePrefix ?: "x") + "_" + tuple.joinToString("_")
+
+            var map: MutableMap<T, Any> = tensorVariables
+
+            for (key in tuple.slice(0 until tuple.lastIndex)) {
+                map = map.computeIfAbsent(key) { mutableMapOf<T, Any>() } as MutableMap<T, Any>
+            }
+
+            val variable = variableProvider(variableName)
+
+            map[tuple.last()] = variable
+        }
+
+        return NamedTensor(
+            keys = tensorKeys,
+            values = tensorVariables,
+        )
     }
 
     public fun maxVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
@@ -473,6 +626,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
             }
 
             expression.coefficients
+                .filterValues { it != 0.0 }
                 .mapKeys { (name, _) -> solverVariables[name] }
                 .forEach { (variable, coefficient) -> solverConstraint.setCoefficient(variable, coefficient) }
 

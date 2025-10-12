@@ -13,6 +13,7 @@ public interface Variable : Expression {
 
     override operator fun unaryMinus(): Parameter = Parameter(name, -1.0)
 
+    // TODO: may optimize multiplication by 0
     override operator fun times(number: Number): Parameter {
         return Parameter(this.name, number.toDouble())
     }

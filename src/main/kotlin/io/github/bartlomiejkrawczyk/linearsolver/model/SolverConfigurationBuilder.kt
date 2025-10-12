@@ -28,6 +28,7 @@ public interface OptimizerExtensions {
     public infix fun Number.x(variable: Variable): Parameter =
         Parameter(coefficient = toDouble(), name = variable.name)
 
+    // TODO: may optimize multiplication by 0
     public operator fun Number.times(variable: Variable): Parameter =
         Parameter(coefficient = toDouble(), name = variable.name)
 
@@ -343,18 +344,72 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    public fun notVar(other: BooleanVariable, name: String? = null): Pair<BooleanVariable, Constraint> {
+        val newVariable = boolVar(name = name)
+        val constraint = constraint {
+            newVariable eq 1 - other
+        }
+        return newVariable to constraint
+    }
+
+    public fun andVar(
+        first: BooleanVariable,
+        second: BooleanVariable,
+        name: String? = null,
+    ): Pair<BooleanVariable, List<Constraint>> {
+        val newVariable = boolVar(name = name)
+        val constraints = listOf(
+            constraint { newVariable le first },
+            constraint { newVariable le second },
+            constraint { newVariable ge first + second - 1 },
+        )
+        return newVariable to constraints
+    }
+
+    public fun orVar(
+        first: BooleanVariable,
+        second: BooleanVariable,
+        name: String? = null,
+    ): Pair<BooleanVariable, List<Constraint>> {
+        val newVariable = boolVar(name = name)
+        val constraints = listOf(
+            constraint { newVariable ge first },
+            constraint { newVariable ge second },
+            constraint { newVariable le first + second },
+        )
+        return newVariable to constraints
+    }
+
+    public fun xorVars(
+        first: BooleanVariable,
+        second: BooleanVariable,
+    ): Triple<BooleanVariable, BooleanVariable, List<Constraint>> {
+        val (andVar, andConstraints) = andVar(first, second)
+        val xorVar = boolVar()
+        val xorConstraints = listOf(
+            constraint { xorVar eq first + second - 2 * andVar }
+        )
+        return Triple(xorVar, andVar, (xorConstraints + andConstraints))
+    }
+
+    /**
+     * To make sure this var is minimal you have to minimize this value in the objective.
+     */
     public fun maxVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
         val newVariable = numVar()
         val constraints = expressions.map { expression ->
-            newVariable ge expression
+            constraint { newVariable ge expression }
         }
         return newVariable to constraints
     }
 
+    /**
+     * To make sure this var is minimal you have to maximize this value in the objective.
+     */
     public fun minVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
         val newVariable = numVar()
         val constraints = expressions.map { expression ->
-            newVariable le expression
+            constraint { newVariable le expression }
         }
         return newVariable to constraints
     }
@@ -378,8 +433,85 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
-    // TODO: configure array of variables
     // TODO: may add boolean operations on bool variables - eg. and, or, oneOf, allOf, nOf etc.
+
+    // Boolean operations
+
+    public fun not(x: BooleanVariable, y: BooleanVariable): Constraint {
+        val constraint = constraint {
+            y eq 1 - x
+        }
+        return constraint
+    }
+
+    public infix fun BooleanVariable.notEq(other: BooleanVariable): Constraint {
+        val constraint = constraint {
+            other eq 1 - this@notEq
+        }
+        return constraint
+    }
+
+    public fun and(
+        first: BooleanVariable,
+        second: BooleanVariable,
+    ): List<Constraint> {
+        val constraints = listOf(
+            constraint { 1.0 le first },
+            constraint { 1.0 le second },
+            constraint { 1.0 ge first + second - 1 },
+        )
+        return constraints
+    }
+
+    @JvmName("infixAnd")
+    public infix fun BooleanVariable.and(
+        other: BooleanVariable,
+    ): List<Constraint> {
+        val constraints = listOf(
+            constraint { 1.0 le this@and },
+            constraint { 1.0 le other },
+            constraint { 1.0 ge this@and + other - 1 },
+        )
+        return constraints
+    }
+
+    public fun or(
+        first: BooleanVariable,
+        second: BooleanVariable,
+    ): List<Constraint> {
+        val constraints = listOf(
+            constraint { 1.0 ge first },
+            constraint { 1.0 ge second },
+            constraint { 1.0 le first + second },
+        )
+        return constraints
+    }
+
+    @JvmName("infixOr")
+    public infix fun BooleanVariable.or(
+        other: BooleanVariable,
+    ): List<Constraint> {
+        val constraints = listOf(
+            constraint { 1.0 ge this@or },
+            constraint { 1.0 ge other },
+            constraint { 1.0 le this@or + other },
+        )
+        return constraints
+    }
+
+    public fun xor(
+        first: BooleanVariable,
+        second: BooleanVariable,
+    ): Constraint {
+        return constraint { first + second eq 1 }
+    }
+
+    @JvmName("infixXor")
+    public infix fun BooleanVariable.xor(
+        other: BooleanVariable,
+    ): Constraint {
+        return constraint { this@xor + other eq 1 }
+    }
 
     // Configure constraints
 

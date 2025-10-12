@@ -13,11 +13,16 @@ public interface Expression {
             -constant
         )
 
-    public operator fun times(number: Number): Expression =
-        LinearExpression(
-            coefficients.mapValues { it.value * number.toDouble() },
-            constant * number.toDouble()
+    public operator fun times(number: Number): Expression {
+        val value = number.toDouble()
+        if (value == 0.0) {
+            return LinearExpression()
+        }
+        return LinearExpression(
+            coefficients.mapValues { it.value * value },
+            constant * value
         )
+    }
 
     public operator fun div(number: Number): Expression =
         LinearExpression(

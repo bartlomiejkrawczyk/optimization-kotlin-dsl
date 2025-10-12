@@ -13,9 +13,12 @@ public interface Variable : Expression {
 
     override operator fun unaryMinus(): Parameter = Parameter(name, -1.0)
 
-    // TODO: may optimize multiplication by 0
-    override operator fun times(number: Number): Parameter {
-        return Parameter(this.name, number.toDouble())
+    override operator fun times(number: Number): Expression {
+        val value = number.toDouble()
+        if (value == 0.0) {
+            return LinearExpression()
+        }
+        return Parameter(this.name, value)
     }
 
     override operator fun div(number: Number): Parameter {

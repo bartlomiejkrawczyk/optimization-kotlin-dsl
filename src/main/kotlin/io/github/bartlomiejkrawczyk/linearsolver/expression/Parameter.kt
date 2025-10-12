@@ -10,8 +10,13 @@ public data class Parameter(
 
     override operator fun unaryMinus(): Parameter = copy(coefficient = -coefficient)
 
-    override operator fun times(number: Number): Parameter =
-        copy(coefficient = coefficient * number.toDouble())
+    override operator fun times(number: Number): Expression {
+        val value = number.toDouble()
+        if (value == 0.0) {
+            return LinearExpression()
+        }
+        return copy(coefficient = coefficient * value)
+    }
 
     override operator fun div(number: Number): Parameter =
         copy(coefficient = coefficient / number.toDouble())

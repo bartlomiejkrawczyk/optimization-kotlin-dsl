@@ -28,12 +28,21 @@ public interface OptimizerExtensions {
     public infix fun Number.x(variable: Variable): Parameter =
         Parameter(coefficient = toDouble(), name = variable.name)
 
-    // TODO: may optimize multiplication by 0
-    public operator fun Number.times(variable: Variable): Parameter =
-        Parameter(coefficient = toDouble(), name = variable.name)
+    public operator fun Number.times(variable: Variable): Expression {
+        val value = toDouble()
+        if (value == 0.0) {
+            return LinearExpression()
+        }
+        return Parameter(coefficient = value, name = variable.name)
+    }
 
-    public operator fun Number.times(parameter: Parameter): Parameter =
-        Parameter(coefficient = parameter.coefficient * toDouble(), name = parameter.name)
+    public operator fun Number.times(parameter: Parameter): Expression {
+        val value = toDouble()
+        if (value == 0.0) {
+            return LinearExpression()
+        }
+        return Parameter(coefficient = parameter.coefficient * toDouble(), name = parameter.name)
+    }
 
     public operator fun Number.times(expression: Expression): LinearExpression =
         LinearExpression(

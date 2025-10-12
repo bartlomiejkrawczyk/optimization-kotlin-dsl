@@ -11,6 +11,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.constraint.StringConstraintBuil
 import io.github.bartlomiejkrawczyk.linearsolver.expression.*
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Goal
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
+import io.github.bartlomiejkrawczyk.linearsolver.objective.ObjectiveBuilder
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 
 interface OptimizerExtensions {
@@ -80,6 +81,10 @@ interface OptimizerExtensions {
     fun <T : Expression> Collection<T>.sum(): Expression {
         return reduce<Expression, Expression> { a, b -> a + b }
     }
+
+    // TODO: average!
+    // TODO: maxmin?
+    // TODO: minmax?
 }
 
 @OptimizerDslMarker
@@ -242,6 +247,13 @@ class SolverConfigurationBuilder : OptimizerExtensions {
     // TODO: configure variable array operations!
 
     // Configure objective
+
+    fun objective(block: ObjectiveBuilder.() -> Objective): Objective {
+        val builder = ObjectiveBuilder()
+        val newObjective = builder.block()
+        objective = newObjective
+        return newObjective
+    }
 
     infix fun Expression.to(goal: Goal): Objective {
         val newObjective = Objective(

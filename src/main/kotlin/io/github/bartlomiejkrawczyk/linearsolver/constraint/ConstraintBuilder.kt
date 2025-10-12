@@ -114,6 +114,14 @@ public open class ConstraintBuilder(
         return 2.0 eq this@and + other
     }
 
+    public fun Array<BooleanVariable>.and(): Constraint {
+        return this@and.sum() eq size
+    }
+
+    public fun Collection<BooleanVariable>.and(): Constraint {
+        return this@and.sum() eq size
+    }
+
     public fun or(
         first: BooleanVariable,
         second: BooleanVariable,
@@ -126,6 +134,14 @@ public open class ConstraintBuilder(
         other: BooleanVariable,
     ): Constraint {
         return 1.0 le this@or + other
+    }
+
+    public fun Array<BooleanVariable>.or(): Constraint {
+        return this@or.sum() ge 1
+    }
+
+    public fun Collection<BooleanVariable>.or(): Constraint {
+        return this@or.sum() ge 1
     }
 
     public fun xor(

@@ -366,6 +366,20 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newVariable to constraints
     }
 
+    public fun andVar(
+        vararg variables: BooleanVariable,
+        name: String? = null,
+    ): Pair<BooleanVariable, List<Constraint>> {
+        val newVariable = boolVar(name = name)
+        val constraints = variables.map { variable ->
+            constraint { newVariable le variable }
+        }.toMutableList()
+        constraints += constraint {
+            newVariable ge variables.sum() - (variables.size - 1)
+        }
+        return newVariable to constraints
+    }
+
     public fun orVar(
         first: BooleanVariable,
         second: BooleanVariable,
@@ -377,6 +391,20 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
             constraint { newVariable ge second },
             constraint { newVariable le first + second },
         )
+        return newVariable to constraints
+    }
+
+    public fun orVar(
+        vararg variables: BooleanVariable,
+        name: String? = null,
+    ): Pair<BooleanVariable, List<Constraint>> {
+        val newVariable = boolVar(name = name)
+        val constraints = variables.map { variable ->
+            constraint { newVariable ge variable }
+        }.toMutableList()
+        constraints += constraint {
+            newVariable le variables.sum()
+        }
         return newVariable to constraints
     }
 

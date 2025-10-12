@@ -1,10 +1,9 @@
 package io.github.bartlomiejkrawczyk.linearsolver
 
-import com.google.ortools.linearsolver.MPSolver
-import io.github.bartlomiejkrawczyk.linearsolver.model.SolverConfiguration
 import io.github.bartlomiejkrawczyk.linearsolver.model.SolverConfigurationBuilder
+import io.github.bartlomiejkrawczyk.linearsolver.objective.Solution
 
-public fun optimization(block: SolverConfigurationBuilder.() -> Unit): Pair<MPSolver.ResultStatus, SolverConfiguration> {
+public fun optimization(block: SolverConfigurationBuilder.() -> Unit): Solution {
     val builder = SolverConfigurationBuilder()
     builder.block()
     val config = builder.build()
@@ -12,7 +11,11 @@ public fun optimization(block: SolverConfigurationBuilder.() -> Unit): Pair<MPSo
     // Verify that the solution satisfies all constraints (when using solvers
     // others than GLOP_LINEAR_PROGRAMMING, this is highly recommended!).
     config.solver.verifySolution(/* tolerance= */ builder.tolerance, /* log_errors= */ true)
-    return status to config
+    return Solution(
+        status = status,
+        config = config,
+        builder = builder,
+    )
 }
 
 @DslMarker

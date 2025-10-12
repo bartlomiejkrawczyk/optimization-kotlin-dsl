@@ -15,32 +15,115 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.ObjectiveBuilder
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 import io.github.bartlomiejkrawczyk.linearsolver.tensor.NamedTensor
 
+/**
+ * Provides algebraic and collection extension functions for building linear expressions.
+ *
+ * This interface defines arithmetic and infix operators (`+`, `-`, `*`, `sum`, `avg`)
+ * that allow concise, DSL-style formulation of optimization problems.
+ *
+ * Example:
+ * ```kotlin
+ * val x1 = numVar("x1")
+ * val x2 = numVar("x2")
+ *
+ * val expr = 3 * x1 + 2 * x2 - 5 // -> 3*x1 + 2*x2 - 5
+ * ```
+ */
 @Suppress("INAPPLICABLE_JVM_NAME")
 public interface OptimizerExtensions {
-    // Number extensions for building expressions
 
+    // -------------------------------------------------------------------------
+    // Number extensions for building expressions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates a [Parameter] with the given variable index, e.g. `3 x 1` → `3*x1`.
+     *
+     * Example:
+     * ```kotlin
+     * val term = 3 x 1 // -> 3*x1
+     * ```
+     */
     public infix fun Number.x(value: Int): Parameter =
         Parameter(coefficient = toDouble(), name = VariableName("x$value"))
 
+    /**
+     * Creates a [Parameter] with the given variable name.
+     *
+     * Example:
+     * ```kotlin
+     * val term = 5 x "x2" // -> 5*x2
+     * ```
+     */
     public infix fun Number.x(name: String): Parameter =
         Parameter(coefficient = toDouble(), name = VariableName(name))
 
+    /**
+     * Creates a [Parameter] from an existing [Variable].
+     *
+     * Example:
+     * ```kotlin
+     * val x3 = numVar("x3")
+     * val term = 4 x x3 // -> 4*x3
+     * ```
+     */
     public infix fun Number.x(variable: Variable): Parameter =
         Parameter(coefficient = toDouble(), name = variable.name)
 
-    // TODO: may optimize multiplication by 0
-    public operator fun Number.times(variable: Variable): Parameter =
-        Parameter(coefficient = toDouble(), name = variable.name)
+    /**
+     * Multiplies this number by a [Variable] to produce an [Expression].
+     *
+     * Example:
+     * ```kotlin
+     * val expr = 2 * x1 // -> 2*x1
+     * ```
+     */
+    public operator fun Number.times(variable: Variable): Expression {
+        val value = toDouble()
+        if (value == 0.0) {
+            return LinearExpression()
+        }
+        return Parameter(coefficient = value, name = variable.name)
+    }
 
-    public operator fun Number.times(parameter: Parameter): Parameter =
-        Parameter(coefficient = parameter.coefficient * toDouble(), name = parameter.name)
+    /**
+     * Scales a [Parameter] by this number.
+     *
+     * Example:
+     * ```kotlin
+     * val term = 2 * (3*x2) // -> 6*x2
+     * ```
+     */
+    public operator fun Number.times(parameter: Parameter): Expression {
+        val value = toDouble()
+        if (value == 0.0) {
+            return LinearExpression()
+        }
+        return Parameter(coefficient = parameter.coefficient * toDouble(), name = parameter.name)
+    }
 
+    /**
+     * Scales all coefficients and constants in an [Expression].
+     *
+     * Example:
+     * ```kotlin
+     * val expr = 2 * (x1 + x2 + 3) // -> 2*x1 + 2*x2 + 6
+     * ```
+     */
     public operator fun Number.times(expression: Expression): LinearExpression =
         LinearExpression(
             constant = expression.constant * toDouble(),
             coefficients = expression.coefficients.mapValues { it.value * toDouble() },
         )
 
+    /**
+     * Adds a [Variable] to a numeric constant.
+     *
+     * Example:
+     * ```kotlin
+     * val expr = 5 + x1 // -> x1 + 5
+     * ```
+     */
     public operator fun Number.plus(variable: Variable): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
@@ -48,6 +131,14 @@ public interface OptimizerExtensions {
         )
     }
 
+    /**
+     * Adds a [Parameter] to a numeric constant.
+     *
+     * Example:
+     * ```kotlin
+     * val expr = 3 + (2*x2) // -> 2*x2 + 3
+     * ```
+     */
     public operator fun Number.plus(parameter: Parameter): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
@@ -55,6 +146,14 @@ public interface OptimizerExtensions {
         )
     }
 
+    /**
+     * Adds a numeric constant to an [Expression].
+     *
+     * Example:
+     * ```kotlin
+     * val expr = 10 + (3*x1 + 2*x2) // -> 3*x1 + 2*x2 + 10
+     * ```
+     */
     public operator fun Number.plus(expression: Expression): LinearExpression {
         return LinearExpression(
             constant = expression.constant + toDouble(),
@@ -62,6 +161,14 @@ public interface OptimizerExtensions {
         )
     }
 
+    /**
+     * Subtracts a [Variable] from a numeric constant.
+     *
+     * Example:
+     * ```kotlin
+     * val expr = 10 - x1 // -> -x1 + 10
+     * ```
+     */
     public operator fun Number.minus(variable: Variable): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
@@ -69,6 +176,14 @@ public interface OptimizerExtensions {
         )
     }
 
+    /**
+     * Subtracts a [Parameter] from a numeric constant.
+     *
+     * Example:
+     * ```kotlin
+     * val expr = 4 - (3 x "x2") // -> -3*x2 + 4
+     * ```
+     */
     public operator fun Number.minus(parameter: Parameter): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
@@ -76,6 +191,14 @@ public interface OptimizerExtensions {
         )
     }
 
+    /**
+     * Subtracts an [Expression] from a numeric constant.
+     *
+     * Example:
+     * ```kotlin
+     * val expr = 5 - (x1 + 2*x2) // -> -x1 - 2*x2 + 5
+     * ```
+     */
     public operator fun Number.minus(expression: Expression): LinearExpression {
         return LinearExpression(
             constant = toDouble() - expression.constant,
@@ -83,39 +206,76 @@ public interface OptimizerExtensions {
         )
     }
 
+    // -------------------------------------------------------------------------
     // Collection extensions
+    // -------------------------------------------------------------------------
+
+    /**
+     * Sums multiple [Expression]s.
+     *
+     * Example:
+     * ```kotlin
+     * val total = sum(3*x1, 2*x2, x3) // -> 3*x1 + 2*x2 + x3
+     * ```
+     */
     @JvmName("sumArray")
     public fun <T : Expression> sum(vararg expressions: T): Expression {
         return expressions.reduce<Expression, Expression> { a, b -> a + b }
     }
 
+    /**
+     * Sums all [Expression]s in an [Iterable].
+     */
     @JvmName("sumIterable")
     public fun <T : Expression> sum(expressions: Iterable<T>): Expression {
         return expressions.reduce<Expression, Expression> { a, b -> a + b }
     }
 
+    /**
+     * Extension to sum all [Expression]s in an [Array].
+     */
     public fun <T : Expression> Array<T>.sum(): Expression {
         return reduce<Expression, Expression> { a, b -> a + b }
     }
 
+    /**
+     * Extension to sum all [Expression]s in an [Iterable].
+     */
     public fun <T : Expression> Iterable<T>.sum(): Expression {
         return reduce<Expression, Expression> { a, b -> a + b }
     }
 
+    /**
+     * Computes the average of given [Expression]s.
+     *
+     * Example:
+     * ```kotlin
+     * val avgExpr = avg(2*x1, 4*x2) // -> (2*x1 + 4*x2) / 2
+     * ```
+     */
     @JvmName("avgArray")
     public fun <T : Expression> avg(vararg expressions: T): Expression {
         return expressions.sum() / expressions.size
     }
 
+    /**
+     * Computes the average of all [Expression]s in a [Collection].
+     */
     @JvmName("avgCollection")
     public fun <T : Expression> avg(expressions: Collection<T>): Expression {
         return expressions.sum() / expressions.size
     }
 
+    /**
+     * Extension to compute average of [Expression]s in an [Array].
+     */
     public fun <T : Expression> Array<T>.avg(): Expression {
         return sum() / size
     }
 
+    /**
+     * Extension to compute average of [Expression]s in a [Collection].
+     */
     public fun <T : Expression> Collection<T>.avg(): Expression {
         return sum() / size
     }
@@ -127,27 +287,87 @@ public fun <T> cartesianProduct(lists: List<List<T>>): Sequence<List<T>> {
     }
 }
 
+/**
+ * Builder class for configuring and constructing optimization problems.
+ *
+ * Provides a fluent DSL for defining decision variables, constraints, and objectives.
+ *
+ * Example:
+ * ```kotlin
+ * val solverConfig = SolverConfigurationBuilder().apply {
+ *     val x1 = numVar("x1", lowerBound = 0.0)
+ *     val x2 = numVar("x2", lowerBound = 0.0)
+ *
+ *     constraint { 3*x1 + 2*x2 le 10 }
+ *     constraint { x1 + x2 ge 4 }
+ *
+ *     max { 5*x1 + 3*x2 }
+ * }.build()
+ * ```
+ */
 @OptimizerDslMarker
 public open class SolverConfigurationBuilder : OptimizerExtensions {
 
+    // -------------------------------------------------------------------------
+    // Configuration properties
+    // -------------------------------------------------------------------------
+
+    /**
+     * Numerical tolerance for solver convergence.
+     * Default is `1e-7`.
+     */
     public var tolerance: Double = 1e-7
 
+    /**
+     * The solver type to use for optimization (e.g., SCIP, CBC, GLOP).
+     *
+     * default: [SolverType.SCIP_MIXED_INTEGER_PROGRAMMING]
+     */
     public var solver: SolverType? = SolverType.SCIP_MIXED_INTEGER_PROGRAMMING
 
+    /**
+     * Sequence number used for auto-generated variable names (x1, x2, ...).
+     */
     public var sequence: Int = 1
 
+    /**
+     * The optimization objective (either MIN or MAX).
+     */
     public var objective: Objective? = null
 
+    /**
+     * All registered variables in the model, keyed by their [VariableName].
+     */
     public val variables: MutableMap<VariableName, Variable> = mutableMapOf()
 
+    /** List of all constraints in the model. */
     public val constraints: MutableList<Constraint> = mutableListOf()
 
+    /**
+     * Sets the solver type.
+     *
+     * Example:
+     * ```kotlin
+     * solver(SolverType.GLOP_LINEAR_PROGRAMMING)
+     * ```
+     */
     public fun solver(type: SolverType) {
         this.solver = type
     }
 
-    // Define variables
+    // -------------------------------------------------------------------------
+    // Variable definitions
+    // -------------------------------------------------------------------------
 
+    /**
+     * Defines an integer decision variable.
+     *
+     * Example:
+     * ```kotlin
+     * val x1 = intVar("x1", lowerBound = 0, upperBound = 10)
+     * // -> 0 <= x1 <= 10 (integer)
+     * ```
+     */
     public fun intVar(
         name: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
@@ -166,6 +386,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return variable
     }
 
+    /**
+     * Defines a continuous (numeric) decision variable with optional bounds.
+     *
+     * Example:
+     * ```kotlin
+     * val x2 = numVar("x2", lowerBound = 0.0)
+     * // -> x2 >= 0 (continuous)
+     * ```
+     */
     public fun numVar(
         name: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
@@ -184,6 +413,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return variable
     }
 
+    /**
+     * Defines a boolean (0-1) decision variable.
+     *
+     * Example:
+     * ```kotlin
+     * val y = boolVar("y")
+     * // -> y ∈ {0, 1}
+     * ```
+     */
     public fun boolVar(
         name: String? = null,
     ): BooleanVariable {
@@ -198,6 +436,19 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return variable
     }
 
+    // -------------------------------------------------------------------------
+    // Vector and tensor variable creation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates a vector of boolean variables.
+     *
+     * Example:
+     * ```kotlin
+     * val items = vectorBoolVar(listOf("a", "b", "c"), namePrefix = "y")
+     * // -> y_a, y_b, y_c ∈ {0, 1}
+     * ```
+     */
     public fun <T> vectorBoolVar(
         vectorKeys: List<T>,
         namePrefix: String? = null,
@@ -213,6 +464,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    /**
+     * Creates a vector of integer variables.
+     *
+     * Example:
+     * ```kotlin
+     * val x = vectorIntVar(listOf("a", "b"), namePrefix = "x", lowerBound = 0)
+     * // -> x_a, x_b are integer >= 0
+     * ```
+     */
     public fun <T> vectorIntVar(
         vectorKeys: List<T>,
         namePrefix: String? = null,
@@ -232,6 +492,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    /**
+     * Creates a vector of numeric variables.
+     *
+     * Example:
+     * ```kotlin
+     * val x = vectorNumVar(listOf("a", "b", "c"), namePrefix = "x", lowerBound = 0.0)
+     * // -> x_a, x_b, x_c >= 0
+     * ```
+     */
     public fun <T> vectorNumVar(
         vectorKeys: List<T>,
         namePrefix: String? = null,
@@ -251,6 +520,14 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    /**
+     * Generic method to build a vector variable tensor using a custom provider.
+     *
+     * Example:
+     * ```kotlin
+     * val x = vectorVar(listOf("i1", "i2")) { name -> numVar(name, lowerBound = 0.0) }
+     * ```
+     */
     public fun <T, V : Variable> vectorVar(
         vectorKeys: List<T>,
         namePrefix: String? = null,
@@ -263,6 +540,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    /**
+     * Creates a tensor (multi-dimensional array) of boolean variables.
+     *
+     * Example:
+     * ```kotlin
+     * val y = tensorBoolVar(listOf(listOf("i1", "i2"), listOf("j1", "j2")), namePrefix = "y")
+     * // -> y_i1_j1, y_i1_j2,
+     * //    y_i2_j1, y_i2_j2
+     * ```
+     */
     public fun <T> tensorBoolVar(
         tensorKeys: List<List<T>>,
         namePrefix: String? = null,
@@ -278,6 +565,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    /**
+     * Creates a tensor (multi-dimensional array) of integer variables.
+     *
+     * Example:
+     * ```kotlin
+     * val y = tensorIntVar(listOf(listOf("i1", "i2"), listOf("j1", "j2")), namePrefix = "y")
+     * // -> y_i1_j1, y_i1_j2,
+     * //    y_i2_j1, y_i2_j2
+     * ```
+     */
     public fun <T> tensorIntVar(
         tensorKeys: List<List<T>>,
         namePrefix: String? = null,
@@ -297,6 +594,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    /**
+     * Creates a tensor (multi-dimensional array) of numeric variables.
+     *
+     * Example:
+     * ```kotlin
+     * val y = tensorIntVar(listOf(listOf("i1", "i2"), listOf("j1", "j2")), namePrefix = "y")
+     * // -> y_i1_j1, y_i1_j2,
+     * //    y_i2_j1, y_i2_j2
+     * ```
+     */
     public fun <T> tensorNumVar(
         tensorKeys: List<List<T>>,
         namePrefix: String? = null,
@@ -316,6 +623,9 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    /**
+     * Generic tensor builder for arbitrary variable types.
+     */
     @Suppress("UNCHECKED_CAST")
     public fun <T, V : Variable> tensorVar(
         tensorKeys: List<List<T>>,
@@ -344,6 +654,19 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
+    // -------------------------------------------------------------------------
+    // Boolean combinators
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates a boolean variable representing the logical NOT of a variable.
+     *
+     * Example:
+     * ```kotlin
+     * val (notY, constraint) = notVar(y)
+     * // -> notY = 1 - y
+     * ```
+     */
     public fun notVar(other: BooleanVariable, name: String? = null): Pair<BooleanVariable, Constraint> {
         val newVariable = boolVar(name = name)
         val constraint = constraint {
@@ -352,6 +675,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newVariable to constraint
     }
 
+    /**
+     * Defines a variable representing logical AND of two boolean variables.
+     *
+     * Example:
+     * ```kotlin
+     * val (z, constraints) = andVar(x1, x2)
+     * // -> z = x1 AND x2
+     * ```
+     */
     public fun andVar(
         first: BooleanVariable,
         second: BooleanVariable,
@@ -366,6 +698,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newVariable to constraints
     }
 
+    /**
+     * Creates a boolean variable representing the logical AND of two or more variables.
+     *
+     * Example:
+     * ```kotlin
+     * val (z, constraints) = andVar(x1, x2, x3)
+     * // -> z <= xi for all i
+     * // -> z >= sum(xi) - (n - 1)
+     * ```
+     */
     public fun andVar(
         vararg variables: BooleanVariable,
         name: String? = null,
@@ -380,6 +722,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newVariable to constraints
     }
 
+    /**
+     * Defines a variable representing logical OR of two boolean variables.
+     *
+     * Example:
+     * ```kotlin
+     * val (z, constraints) = orVar(x1, x2)
+     * // -> z = x1 OR x2
+     * ```
+     */
     public fun orVar(
         first: BooleanVariable,
         second: BooleanVariable,
@@ -394,6 +745,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newVariable to constraints
     }
 
+    /**
+     * Creates a boolean variable representing the logical OR of two or more variables.
+     *
+     * Example:
+     * ```kotlin
+     * val (z, constraints) = orVar(x1, x2, x3)
+     * // -> z >= xi for all i
+     * // -> z <= sum(xi)
+     * ```
+     */
     public fun orVar(
         vararg variables: BooleanVariable,
         name: String? = null,
@@ -408,6 +769,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newVariable to constraints
     }
 
+    /**
+     * Creates a boolean variable representing the logical XOR of two variables.
+     *
+     * Example:
+     * ```kotlin
+     * val (xorVar, andVar, constraints) = xorVars(x1, x2)
+     * // -> xorVar = x1 + x2 - 2*andVar
+     * ```
+     */
     public fun xorVars(
         first: BooleanVariable,
         second: BooleanVariable,
@@ -421,7 +791,17 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     }
 
     /**
-     * To make sure this var is minimal you have to minimize this value in the objective.
+     * Creates a variable representing the maximum among expressions.
+     *
+     * Note: To ensure this variable is minimized correctly, include it in the objective
+     * (e.g., minimize this value or add it with a small epsilon weight).
+     *
+     * Example:
+     * ```kotlin
+     * val (maxVar, constraints) = maxVar(x1 + x2, x3)
+     * // -> maxVar >= each expression
+     * // minimize(maxVar)
+     * ```
      */
     public fun maxVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
         val newVariable = numVar()
@@ -432,7 +812,17 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     }
 
     /**
-     * To make sure this var is minimal you have to maximize this value in the objective.
+     * Creates a variable representing the minimum among expressions.
+     *
+     * Note: To ensure this variable is maximized correctly, include it in the objective
+     * (e.g., maximize this value or add it with a small epsilon weight).
+     *
+     * Example:
+     * ```kotlin
+     * val (minVar, constraints) = minVar(x1 + x2, x3)
+     * // -> minVar <= each expression
+     * // maximize(minVar)
+     * ```
      */
     public fun minVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
         val newVariable = numVar()
@@ -443,9 +833,17 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     }
 
     /**
-     * To make sure absolute value is correctly calculated you should include expressionToMinimize in your objective.
+     * Creates variables and constraint representing the absolute value of an expression.
      *
-     * In case of maximization, you should just maximize negative of the expression!
+     * Note: To ensure the absolute value is minimized correctly, include the resulting expression
+     * in the objective function. In case of maximization, maximize the negative of the expression.
+     *
+     * Example:
+     * ```kotlin
+     * val (pair, constraint, absExpr) = absoluteVar(x1 - x2)
+     * // -> absExpr = |x1 - x2|
+     * // minimize(absExpr)
+     * ```
      */
     public fun absoluteVar(expression: Expression): Triple<Pair<Variable, Variable>, Constraint, Expression> {
         val positiveDeviation = numVar(lowerBound = 0)
@@ -461,8 +859,13 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
-    // Boolean operations
+    // -------------------------------------------------------------------------
+    // Boolean constraint operations
+    // -------------------------------------------------------------------------
 
+    /**
+     * Defines a constraint `y = 1 - x` representing logical NOT.
+     */
     public fun not(x: BooleanVariable, y: BooleanVariable): Constraint {
         val constraint = constraint {
             y eq 1 - x
@@ -470,6 +873,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines a negated equality constraint.
+     *
+     * Example:
+     * ```kotlin
+     * constraint { x1 notEq x2 }
+     * // -> x1 != x2
+     * ```
+     */
     public infix fun BooleanVariable.notEq(other: BooleanVariable): Constraint {
         val constraint = constraint {
             other eq 1 - this@notEq
@@ -477,6 +889,9 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines AND constraints for two boolean variables.
+     */
     public fun and(
         first: BooleanVariable,
         second: BooleanVariable,
@@ -489,6 +904,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraints
     }
 
+    /** Infix version of [and]. */
     @JvmName("infixAnd")
     public infix fun BooleanVariable.and(
         other: BooleanVariable,
@@ -501,6 +917,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraints
     }
 
+    /** Defines OR constraints for two boolean variables. */
     public fun or(
         first: BooleanVariable,
         second: BooleanVariable,
@@ -513,6 +930,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraints
     }
 
+    /** Infix version of [or]. */
     @JvmName("infixOr")
     public infix fun BooleanVariable.or(
         other: BooleanVariable,
@@ -525,6 +943,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraints
     }
 
+    /** Defines XOR constraint for two boolean variables: x1 + x2 = 1. */
     public fun xor(
         first: BooleanVariable,
         second: BooleanVariable,
@@ -532,6 +951,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint { first + second eq 1 }
     }
 
+    /** Infix version of [xor]. */
     @JvmName("infixXor")
     public infix fun BooleanVariable.xor(
         other: BooleanVariable,
@@ -539,73 +959,98 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint { this@xor + other eq 1 }
     }
 
+    /** Constrains all variables to 1 (true). */
     @JvmName("allOfVararg")
     public fun allOf(vararg variables: BooleanVariable): Constraint {
         return constraint { variables.sum() eq variables.size }
     }
 
+    /** Constrains all variables to 1 (true). */
     public fun Array<BooleanVariable>.allOf(): Constraint {
         return constraint { this@allOf.sum() eq size }
     }
 
+    /** Constrains all variables to 1 (true). */
     public fun Collection<BooleanVariable>.allOf(): Constraint {
         return constraint { this@allOf.sum() eq size }
     }
 
+    /** Constrains all variables to 0 (false). */
     @JvmName("noneOfVararg")
     public fun noneOf(vararg variables: BooleanVariable): Constraint {
         return constraint { variables.sum() eq 0 }
     }
 
+    /** Constrains all variables to 0 (false). */
     public fun Array<BooleanVariable>.noneOf(): Constraint {
         return constraint { this@noneOf.sum() eq 0 }
     }
 
+    /** Constrains all variables to 0 (false). */
     public fun Iterable<BooleanVariable>.noneOf(): Constraint {
         return constraint { this@noneOf.sum() eq 0 }
     }
 
+    /** Enforces exactly `n` variables to be 1. */
     @JvmName("nOfVararg")
     public fun nOf(n: Int, vararg variables: BooleanVariable): Constraint {
         return constraint { variables.sum() eq n }
     }
 
+    /** Enforces exactly `n` variables to be 1. */
     public fun Array<BooleanVariable>.nOf(n: Int): Constraint {
         return constraint { this@nOf.sum() eq n }
     }
 
+    /** Enforces exactly `n` variables to be 1. */
     public fun Iterable<BooleanVariable>.nOf(n: Int): Constraint {
         return constraint { this@nOf.sum() eq n }
     }
 
+    /** Enforces at least `n` variables to be 1. */
     @JvmName("atLeastVararg")
     public fun atLeast(n: Int, vararg variables: BooleanVariable): Constraint {
         return constraint { variables.sum() ge n }
     }
 
+    /** Enforces at least `n` variables to be 1. */
     public fun Array<BooleanVariable>.atLeast(n: Int): Constraint {
         return constraint { this@atLeast.sum() ge n }
     }
 
+    /** Enforces at least `n` variables to be 1. */
     public fun Iterable<BooleanVariable>.atLeast(n: Int): Constraint {
         return constraint { this@atLeast.sum() ge n }
     }
 
+    /** Enforces at most `n` variables to be 1. */
     @JvmName("atMostVararg")
     public fun atMost(n: Int, vararg variables: BooleanVariable): Constraint {
         return constraint { variables.sum() le n }
     }
 
+    /** Enforces at most `n` variables to be 1. */
     public fun Array<BooleanVariable>.atMost(n: Int): Constraint {
         return constraint { this@atMost.sum() le n }
     }
 
+    /** Enforces at most `n` variables to be 1. */
     public fun Iterable<BooleanVariable>.atMost(n: Int): Constraint {
         return constraint { this@atMost.sum() le n }
     }
 
-    // Configure constraints
+    // -------------------------------------------------------------------------
+    // Constraint configuration
+    // -------------------------------------------------------------------------
 
+    /**
+     * Creates and registers a constraint within the current model.
+     *
+     * Example:
+     * ```kotlin
+     * constraint { 3*x1 + 2*x2 le 10 }
+     * ```
+     */
     public fun constraint(block: ConstraintBuilder.() -> Constraint): Constraint {
         val builder = ConstraintBuilder()
         val constraint = builder.block()
@@ -613,6 +1058,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * DSL-style named constraint.
+     *
+     * Example:
+     * ```kotlin
+     * "capacity" {
+     *     x1 + x2 le 100
+     * }
+     * ```
+     */
     public operator fun String.invoke(block: ConstraintBuilder.() -> Constraint): Constraint {
         val builder = ConstraintBuilder(this)
         val constraint = builder.block()
@@ -620,6 +1075,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /** Creates a constraint between two [Expression]s. */
     public fun constraint(
         left: Expression,
         right: Expression,
@@ -634,6 +1090,18 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines a "less than or equal to" constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + 2*x2 le 5 }
+     * // -> x1 + 2*x2 <= 5
+     *
+     * constraint { totalCost le budget }
+     * // -> totalCost <= budget
+     * ```
+     */
     public infix fun Expression.le(value: Number): Constraint {
         val constraint = Constraint(
             left = this@le,
@@ -644,6 +1112,19 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+
+    /**
+     * Defines a "less than or equal to" constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + 2*x2 le 5 }
+     * // -> x1 + 2*x2 <= 5
+     *
+     * constraint { totalCost le budget }
+     * // -> totalCost <= budget
+     * ```
+     */
     public infix fun Expression.le(other: Expression): Constraint {
         val constraint = Constraint(
             left = this@le,
@@ -654,6 +1135,19 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+
+    /**
+     * Defines a "less than or equal to" constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + 2*x2 le 5 }
+     * // -> x1 + 2*x2 <= 5
+     *
+     * constraint { totalCost le budget }
+     * // -> totalCost <= budget
+     * ```
+     */
     public infix fun Number.le(other: Expression): Constraint {
         val constraint = Constraint(
             left = LinearExpression(constant = this@le.toDouble()),
@@ -664,6 +1158,18 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines an equality constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + x2 eq 5 }
+     * // -> x1 + x2 = 5
+     *
+     * constraint { demand eq supply }
+     * // -> demand = supply
+     * ```
+     */
     public infix fun Expression.eq(value: Number): Constraint {
         val constraint = Constraint(
             left = this@eq,
@@ -674,6 +1180,18 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines an equality constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + x2 eq 5 }
+     * // -> x1 + x2 = 5
+     *
+     * constraint { demand eq supply }
+     * // -> demand = supply
+     * ```
+     */
     public infix fun Expression.eq(other: Expression): Constraint {
         val constraint = Constraint(
             left = this@eq,
@@ -684,6 +1202,18 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines an equality constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + x2 eq 5 }
+     * // -> x1 + x2 = 5
+     *
+     * constraint { demand eq supply }
+     * // -> demand = supply
+     * ```
+     */
     public infix fun Number.eq(other: Expression): Constraint {
         val constraint = Constraint(
             left = LinearExpression(constant = this@eq.toDouble()),
@@ -694,6 +1224,18 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines a "greater than or equal to" constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + 2*x2 ge 10 }
+     * // -> x1 + 2*x2 >= 10
+     *
+     * constraint { revenue ge cost + 1000 }
+     * // -> revenue >= cost + 1000
+     * ```
+     */
     public infix fun Expression.ge(value: Number): Constraint {
         val constraint = Constraint(
             left = this@ge,
@@ -704,6 +1246,18 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines a "greater than or equal to" constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + 2*x2 ge 10 }
+     * // -> x1 + 2*x2 >= 10
+     *
+     * constraint { revenue ge cost + 1000 }
+     * // -> revenue >= cost + 1000
+     * ```
+     */
     public infix fun Expression.ge(other: Expression): Constraint {
         val constraint = Constraint(
             left = this@ge,
@@ -714,6 +1268,18 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    /**
+     * Defines a "greater than or equal to" constraint between two expressions.
+     *
+     * Examples:
+     * ```kotlin
+     * constraint { x1 + 2*x2 ge 10 }
+     * // -> x1 + 2*x2 >= 10
+     *
+     * constraint { revenue ge cost + 1000 }
+     * // -> revenue >= cost + 1000
+     * ```
+     */
     public infix fun Number.ge(other: Expression): Constraint {
         val constraint = Constraint(
             left = LinearExpression(constant = this@ge.toDouble()),
@@ -724,26 +1290,20 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
-    // TODO: configure variable array operations!
 
-    // Configure objective
+    // -------------------------------------------------------------------------
+    // Objective configuration
+    // -------------------------------------------------------------------------
 
-    public fun min(block: OptimizerExtensions.() -> Expression): Objective {
-        val builder = ObjectiveBuilder()
-        val expression = builder.block()
-        val newObjective = expression to Goal.MIN
-        objective = newObjective
-        return newObjective
-    }
-
-    public fun max(block: OptimizerExtensions.() -> Expression): Objective {
-        val builder = ObjectiveBuilder()
-        val expression = builder.block()
-        val newObjective = expression to Goal.MAX
-        objective = newObjective
-        return newObjective
-    }
-
+    /**
+     * Maximizes the smallest value among given expressions (max-min problem).
+     *
+     * Example:
+     * ```kotlin
+     * val (obj, z, cons) = maxmin(x1, x2, x3)
+     * // -> maximize z, where z <= x1, z <= x2, z <= x3
+     * ```
+     */
     public fun maxmin(vararg expressions: Expression): Triple<Objective, Variable, List<Constraint>> {
         val newVariable = numVar()
         val constraints = expressions.map { expression ->
@@ -755,6 +1315,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return Triple(objective, newVariable, constraints)
     }
 
+    /**
+     * Minimizes the largest value among given expressions (min-max problem).
+     *
+     * Example:
+     * ```kotlin
+     * val (obj, z, cons) = minmax(x1, x2, x3)
+     * // -> minimize z, where z >= x1, z >= x2, z >= x3
+     * ```
+     */
     public fun minmax(vararg expressions: Expression): Triple<Objective, Variable, List<Constraint>> {
         val newVariable = numVar()
         val constraints = expressions.map { expression ->
@@ -766,6 +1335,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return Triple(objective, newVariable, constraints)
     }
 
+    /** Defines a custom objective directly via builder. */
     public fun objective(block: ObjectiveBuilder.() -> Objective): Objective {
         val builder = ObjectiveBuilder()
         val newObjective = builder.block()
@@ -773,6 +1343,15 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newObjective
     }
 
+    /**
+     * Creates an objective from an expression and a goal.
+     *
+     * Example:
+     * ```kotlin
+     * 3*x1 + 2*x2 to Goal.MIN
+     * // -> minimize 3*x1 + 2*x2
+     * ```
+     */
     public infix fun Expression.to(goal: Goal): Objective {
         val newObjective = Objective(
             expression = this@to,
@@ -782,6 +1361,31 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newObjective
     }
 
+    /**
+     * Sets a minimization objective.
+     *
+     * Example:
+     * ```kotlin
+     * min { 3*x1 + 2*x2 }
+     * ```
+     */
+    public fun min(block: OptimizerExtensions.() -> Expression): Objective {
+        val builder = ObjectiveBuilder()
+        val expression = builder.block()
+        val newObjective = expression to Goal.MIN
+        objective = newObjective
+        return newObjective
+    }
+
+    /**
+     * Sets a minimization objective directly from an expression.
+     *
+     * Example:
+     * ```kotlin
+     * min(3*x1 + 2*x2)
+     * // -> minimize 3*x1 + 2*x2
+     * ```
+     */
     public infix fun min(expression: Expression): Objective {
         val newObjective = Objective(
             expression = expression,
@@ -791,6 +1395,31 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newObjective
     }
 
+    /**
+     * Sets a maximization objective.
+     *
+     * Example:
+     * ```kotlin
+     * max { 5*x1 + 4*x2 }
+     * ```
+     */
+    public fun max(block: OptimizerExtensions.() -> Expression): Objective {
+        val builder = ObjectiveBuilder()
+        val expression = builder.block()
+        val newObjective = expression to Goal.MAX
+        objective = newObjective
+        return newObjective
+    }
+
+    /**
+     * Sets a maximization objective directly from an expression.
+     *
+     * Example:
+     * ```kotlin
+     * max(x1 + x2)
+     * // -> maximize x1 + x2
+     * ```
+     */
     public infix fun max(expression: Expression): Objective {
         val newObjective = Objective(
             expression = expression,
@@ -800,9 +1429,32 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return newObjective
     }
 
+    // -------------------------------------------------------------------------
+    // Model building
+    // -------------------------------------------------------------------------
 
-    // Builder method
-
+    /**
+     * Builds and validates the solver configuration.
+     *
+     * Must contain:
+     * - At least one variable
+     * - At least one constraint
+     * - An objective
+     * - A solver type
+     *
+     * Example:
+     * ```kotlin
+     * val solverConfig = SolverConfigurationBuilder().apply {
+     *     val x1 = numVar("x1", lowerBound = 0.0)
+     *     val x2 = numVar("x2", lowerBound = 0.0)
+     *
+     *     constraint { 3*x1 + 2*x2 le 10 }
+     *     constraint { x1 + x2 ge 4 }
+     *
+     *     max { 5*x1 + 3*x2 }
+     * }.build()
+     * ```
+     */
     public fun build(): SolverConfiguration {
         if (constraints.isEmpty()) {
             throw IllegalStateException("At least one linear constraint configuration must be provided")

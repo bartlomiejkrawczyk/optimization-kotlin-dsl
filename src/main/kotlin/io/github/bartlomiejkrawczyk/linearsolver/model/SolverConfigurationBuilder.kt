@@ -117,10 +117,6 @@ public interface OptimizerExtensions {
     public fun <T : Expression> Collection<T>.avg(): Expression {
         return sum() / size
     }
-
-    // TODO: maxmin?
-    // TODO: minmax?
-    // TODO: absolute?
 }
 
 @OptimizerDslMarker
@@ -146,14 +142,14 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
 
     public fun intVar(
         name: String? = null,
-        lowerBound: Double = Double.NEGATIVE_INFINITY,
-        upperBound: Double = Double.POSITIVE_INFINITY,
+        lowerBound: Number = Double.NEGATIVE_INFINITY,
+        upperBound: Number = Double.POSITIVE_INFINITY,
     ): Variable {
         val variableName = name ?: "x${sequence++}"
         val variable = IntegerVariable(
             name = VariableName(variableName),
-            lowerBound = lowerBound,
-            upperBound = upperBound,
+            lowerBound = lowerBound.toDouble(),
+            upperBound = upperBound.toDouble(),
         )
         if (variables.containsKey(variable.name)) {
             throw IllegalArgumentException("Variable with name ${variable.name} already exists")
@@ -164,14 +160,14 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
 
     public fun numVar(
         name: String? = null,
-        lowerBound: Double = Double.NEGATIVE_INFINITY,
-        upperBound: Double = Double.POSITIVE_INFINITY,
+        lowerBound: Number = Double.NEGATIVE_INFINITY,
+        upperBound: Number = Double.POSITIVE_INFINITY,
     ): Variable {
         val variableName = name ?: "x${sequence++}"
         val variable = NumericVariable(
             name = VariableName(variableName),
-            lowerBound = lowerBound,
-            upperBound = upperBound,
+            lowerBound = lowerBound.toDouble(),
+            upperBound = upperBound.toDouble(),
         )
         if (variables.containsKey(variable.name)) {
             throw IllegalArgumentException("Variable with name ${variable.name} already exists")
@@ -208,6 +204,25 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
             newVariable le expression
         }
         return newVariable to constraints
+    }
+
+    /**
+     * To make sure absolute value is correctly calculated you should include expressionToMinimize in your objective.
+     *
+     * In case of maximization, you should just maximize negative of the expression!
+     */
+    public fun absoluteVar(expression: Expression): Triple<Pair<Variable, Variable>, Constraint, Expression> {
+        val positiveDeviation = numVar(lowerBound = 0)
+        val negativeDeviation = numVar(lowerBound = 0)
+        val constraint = constraint {
+            positiveDeviation - negativeDeviation eq expression
+        }
+        val expressionToMinimize = positiveDeviation + negativeDeviation
+        return Triple(
+            positiveDeviation to negativeDeviation,
+            constraint,
+            expressionToMinimize,
+        )
     }
 
     // TODO: configure array of variables

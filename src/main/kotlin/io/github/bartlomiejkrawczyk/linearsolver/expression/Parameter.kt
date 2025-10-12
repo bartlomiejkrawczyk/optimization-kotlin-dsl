@@ -1,6 +1,6 @@
 package io.github.bartlomiejkrawczyk.linearsolver.expression
 
-data class Parameter(
+public data class Parameter(
     val name: VariableName,
     val coefficient: Double,
 ) : Expression {
@@ -16,7 +16,7 @@ data class Parameter(
     override operator fun div(number: Number): Parameter =
         copy(coefficient = coefficient / number.toDouble())
 
-    operator fun plus(number: Number): LinearExpression {
+    public operator fun plus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(
                 name to coefficient,
@@ -25,7 +25,7 @@ data class Parameter(
         )
     }
 
-    operator fun plus(variable: Variable): Expression {
+    public operator fun plus(variable: Variable): Expression {
         if (variable.name == name) {
             return copy(coefficient = coefficient + 1.0)
         }
@@ -37,7 +37,7 @@ data class Parameter(
         )
     }
 
-    operator fun plus(parameter: Parameter): Expression {
+    public operator fun plus(parameter: Parameter): Expression {
         if (parameter.name == name) {
             return copy(coefficient = coefficient + parameter.coefficient)
         }
@@ -58,7 +58,7 @@ data class Parameter(
         )
     }
 
-    operator fun minus(number: Number): LinearExpression {
+    public operator fun minus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(
                 name to coefficient,
@@ -67,7 +67,7 @@ data class Parameter(
         )
     }
 
-    operator fun minus(variable: Variable): Expression {
+    public operator fun minus(variable: Variable): Expression {
         if (variable.name == name) {
             return copy(coefficient = coefficient - 1.0)
         }
@@ -79,7 +79,7 @@ data class Parameter(
         )
     }
 
-    operator fun minus(parameter: Parameter): Expression {
+    public operator fun minus(parameter: Parameter): Expression {
         if (parameter.name == name) {
             return copy(coefficient = coefficient - parameter.coefficient)
         }

@@ -1,6 +1,6 @@
 package io.github.bartlomiejkrawczyk.linearsolver.solver
 
-enum class SolverType {
+public enum class SolverType {
     CLP_LINEAR_PROGRAMMING, CLP,
     CBC_MIXED_INTEGER_PROGRAMMING, CBC,
 

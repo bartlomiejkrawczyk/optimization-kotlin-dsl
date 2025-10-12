@@ -6,11 +6,11 @@ import io.github.bartlomiejkrawczyk.linearsolver.expression.LinearExpression
 import io.github.bartlomiejkrawczyk.linearsolver.model.OptimizerExtensions
 
 @OptimizerDslMarker
-class StringConstraintBuilder(
-    val name: String,
+public class StringConstraintBuilder(
+    private val name: String,
 ) : OptimizerExtensions {
 
-    infix fun Expression.le(value: Number): Constraint {
+    public infix fun Expression.le(value: Number): Constraint {
         return Constraint(
             name = name,
             left = this@le,
@@ -19,7 +19,7 @@ class StringConstraintBuilder(
         )
     }
 
-    infix fun Expression.le(other: Expression): Constraint {
+    public infix fun Expression.le(other: Expression): Constraint {
         return Constraint(
             name = name,
             left = this@le,
@@ -28,7 +28,7 @@ class StringConstraintBuilder(
         )
     }
 
-    infix fun Expression.eq(value: Number): Constraint {
+    public infix fun Expression.eq(value: Number): Constraint {
         return Constraint(
             name = name,
             left = this@eq,
@@ -37,7 +37,7 @@ class StringConstraintBuilder(
         )
     }
 
-    infix fun Expression.eq(other: Expression): Constraint {
+    public infix fun Expression.eq(other: Expression): Constraint {
         return Constraint(
             name = name,
             left = this@eq,
@@ -46,7 +46,7 @@ class StringConstraintBuilder(
         )
     }
 
-    infix fun Expression.ge(value: Number): Constraint {
+    public infix fun Expression.ge(value: Number): Constraint {
         return Constraint(
             name = name,
             left = this@ge,
@@ -55,7 +55,7 @@ class StringConstraintBuilder(
         )
     }
 
-    infix fun Expression.ge(other: Expression): Constraint {
+    public infix fun Expression.ge(other: Expression): Constraint {
         return Constraint(
             name = name,
             left = this@ge,

@@ -14,59 +14,59 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.Objective
 import io.github.bartlomiejkrawczyk.linearsolver.objective.ObjectiveBuilder
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 
-interface OptimizerExtensions {
+public interface OptimizerExtensions {
     // Number extensions for building expressions
 
-    infix fun Number.x(variable: Variable) = Parameter(coefficient = toDouble(), name = variable.name)
+    public infix fun Number.x(variable: Variable): Parameter = Parameter(coefficient = toDouble(), name = variable.name)
 
-    operator fun Number.times(variable: Variable): Parameter =
+    public operator fun Number.times(variable: Variable): Parameter =
         Parameter(coefficient = toDouble(), name = variable.name)
 
-    operator fun Number.times(parameter: Parameter): Parameter =
+    public operator fun Number.times(parameter: Parameter): Parameter =
         Parameter(coefficient = parameter.coefficient * toDouble(), name = parameter.name)
 
-    operator fun Number.times(expression: Expression): LinearExpression =
+    public operator fun Number.times(expression: Expression): LinearExpression =
         LinearExpression(
             constant = expression.constant * toDouble(),
             coefficients = expression.coefficients.mapValues { it.value * toDouble() },
         )
 
-    operator fun Number.plus(variable: Variable): LinearExpression {
+    public operator fun Number.plus(variable: Variable): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
             coefficients = mapOf(variable.name to 1.0),
         )
     }
 
-    operator fun Number.plus(parameter: Parameter): LinearExpression {
+    public operator fun Number.plus(parameter: Parameter): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
             coefficients = mapOf(parameter.name to parameter.coefficient),
         )
     }
 
-    operator fun Number.plus(expression: Expression): LinearExpression {
+    public operator fun Number.plus(expression: Expression): LinearExpression {
         return LinearExpression(
             constant = expression.constant + toDouble(),
             coefficients = expression.coefficients,
         )
     }
 
-    operator fun Number.minus(variable: Variable): LinearExpression {
+    public operator fun Number.minus(variable: Variable): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
             coefficients = mapOf(variable.name to -1.0),
         )
     }
 
-    operator fun Number.minus(parameter: Parameter): LinearExpression {
+    public operator fun Number.minus(parameter: Parameter): LinearExpression {
         return LinearExpression(
             constant = toDouble(),
             coefficients = mapOf(parameter.name to -parameter.coefficient),
         )
     }
 
-    operator fun Number.minus(expression: Expression): LinearExpression {
+    public operator fun Number.minus(expression: Expression): LinearExpression {
         return LinearExpression(
             constant = toDouble() - expression.constant,
             coefficients = expression.coefficients.mapValues { -it.value },
@@ -74,11 +74,11 @@ interface OptimizerExtensions {
     }
 
     // Collection extensions
-    fun <T : Expression> Array<T>.sum(): Expression {
+    public fun <T : Expression> Array<T>.sum(): Expression {
         return reduce<Expression, Expression> { a, b -> a + b }
     }
 
-    fun <T : Expression> Collection<T>.sum(): Expression {
+    public fun <T : Expression> Collection<T>.sum(): Expression {
         return reduce<Expression, Expression> { a, b -> a + b }
     }
 
@@ -88,27 +88,27 @@ interface OptimizerExtensions {
 }
 
 @OptimizerDslMarker
-class SolverConfigurationBuilder : OptimizerExtensions {
+public class SolverConfigurationBuilder : OptimizerExtensions {
 
-    var tolerance: Double = 1e-7
+    public var tolerance: Double = 1e-7
 
-    var solver: SolverType? = SolverType.SCIP_MIXED_INTEGER_PROGRAMMING
+    public var solver: SolverType? = SolverType.SCIP_MIXED_INTEGER_PROGRAMMING
 
-    var sequence: Int = 1
+    public var sequence: Int = 1
 
-    var objective: Objective? = null
+    public var objective: Objective? = null
 
-    val variables = mutableMapOf<VariableName, Variable>()
+    public val variables: MutableMap<VariableName, Variable> = mutableMapOf()
 
-    val constraints = mutableListOf<Constraint>()
+    public val constraints: MutableList<Constraint> = mutableListOf()
 
-    fun solver(type: SolverType) {
+    public fun solver(type: SolverType) {
         this.solver = type
     }
 
     // Define variables
 
-    fun intVar(
+    public fun intVar(
         name: String? = null,
         lowerBound: Double = Double.NEGATIVE_INFINITY,
         upperBound: Double = Double.POSITIVE_INFINITY,
@@ -126,7 +126,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return variable
     }
 
-    fun numVar(
+    public fun numVar(
         name: String? = null,
         lowerBound: Double = Double.NEGATIVE_INFINITY,
         upperBound: Double = Double.POSITIVE_INFINITY,
@@ -144,7 +144,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return variable
     }
 
-    fun boolVar(
+    public fun boolVar(
         name: String? = null,
     ): Variable {
         val variableName = name ?: "x${sequence++}"
@@ -163,14 +163,14 @@ class SolverConfigurationBuilder : OptimizerExtensions {
 
     // Configure constraints
 
-    operator fun String.invoke(block: StringConstraintBuilder.() -> Constraint): Constraint {
+    public operator fun String.invoke(block: StringConstraintBuilder.() -> Constraint): Constraint {
         val builder = StringConstraintBuilder(this)
         val constraint = builder.block()
         constraints += constraint
         return constraint
     }
 
-    fun constraint(
+    public fun constraint(
         left: Expression,
         right: Expression,
         relationship: Relationship,
@@ -184,7 +184,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
-    infix fun Expression.le(value: Number): Constraint {
+    public infix fun Expression.le(value: Number): Constraint {
         val constraint = Constraint(
             left = this@le,
             right = LinearExpression(constant = value.toDouble()),
@@ -194,7 +194,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
-    infix fun Expression.le(other: Expression): Constraint {
+    public infix fun Expression.le(other: Expression): Constraint {
         val constraint = Constraint(
             left = this@le,
             right = other,
@@ -204,7 +204,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
-    infix fun Expression.eq(value: Number): Constraint {
+    public infix fun Expression.eq(value: Number): Constraint {
         val constraint = Constraint(
             left = this@eq,
             right = LinearExpression(constant = value.toDouble()),
@@ -214,7 +214,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
-    infix fun Expression.eq(other: Expression): Constraint {
+    public infix fun Expression.eq(other: Expression): Constraint {
         val constraint = Constraint(
             left = this@eq,
             right = other,
@@ -224,7 +224,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
-    infix fun Expression.ge(value: Number): Constraint {
+    public infix fun Expression.ge(value: Number): Constraint {
         val constraint = Constraint(
             left = this@ge,
             right = LinearExpression(constant = value.toDouble()),
@@ -234,7 +234,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
-    infix fun Expression.ge(other: Expression): Constraint {
+    public infix fun Expression.ge(other: Expression): Constraint {
         val constraint = Constraint(
             left = this@ge,
             right = other,
@@ -248,14 +248,14 @@ class SolverConfigurationBuilder : OptimizerExtensions {
 
     // Configure objective
 
-    fun objective(block: ObjectiveBuilder.() -> Objective): Objective {
+    public fun objective(block: ObjectiveBuilder.() -> Objective): Objective {
         val builder = ObjectiveBuilder()
         val newObjective = builder.block()
         objective = newObjective
         return newObjective
     }
 
-    infix fun Expression.to(goal: Goal): Objective {
+    public infix fun Expression.to(goal: Goal): Objective {
         val newObjective = Objective(
             expression = this@to,
             goal = goal,
@@ -264,7 +264,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return newObjective
     }
 
-    infix fun min(expression: Expression): Objective {
+    public infix fun min(expression: Expression): Objective {
         val newObjective = Objective(
             expression = expression,
             goal = Goal.MIN,
@@ -273,7 +273,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
         return newObjective
     }
 
-    infix fun max(expression: Expression): Objective {
+    public infix fun max(expression: Expression): Objective {
         val newObjective = Objective(
             expression = expression,
             goal = Goal.MAX,
@@ -285,7 +285,7 @@ class SolverConfigurationBuilder : OptimizerExtensions {
 
     // Builder method
 
-    fun build(): SolverConfiguration {
+    public fun build(): SolverConfiguration {
         if (constraints.isEmpty()) {
             throw IllegalStateException("At least one linear constraint configuration must be provided")
         }

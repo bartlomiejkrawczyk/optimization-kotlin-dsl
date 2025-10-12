@@ -2,7 +2,7 @@ package io.github.bartlomiejkrawczyk.linearsolver.constraint
 
 import io.github.bartlomiejkrawczyk.linearsolver.expression.Expression
 
-data class Constraint(
+public data class Constraint(
     val name: String? = null,
     val left: Expression,
     val right: Expression,

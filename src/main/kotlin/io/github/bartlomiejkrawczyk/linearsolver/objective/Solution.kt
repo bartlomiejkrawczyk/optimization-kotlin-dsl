@@ -1,5 +1,6 @@
 package io.github.bartlomiejkrawczyk.linearsolver.objective
 
-data class Solution(
+// TODO: return solution instead of current impl
+public data class Solution(
     val optimal: Boolean,
 )

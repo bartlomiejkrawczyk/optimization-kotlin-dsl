@@ -1,31 +1,31 @@
 package io.github.bartlomiejkrawczyk.linearsolver.expression
 
-interface Expression {
+public interface Expression {
 
-    val coefficients: Map<VariableName, Double>
+    public val coefficients: Map<VariableName, Double>
 
-    val constant: Double
+    public val constant: Double
         get() = 0.0
 
-    operator fun unaryMinus(): Expression =
+    public operator fun unaryMinus(): Expression =
         LinearExpression(
             coefficients.mapValues { -it.value },
             -constant
         )
 
-    operator fun times(number: Number): Expression =
+    public operator fun times(number: Number): Expression =
         LinearExpression(
             coefficients.mapValues { it.value * number.toDouble() },
             constant * number.toDouble()
         )
 
-    operator fun div(number: Number): Expression =
+    public operator fun div(number: Number): Expression =
         LinearExpression(
             coefficients.mapValues { it.value / number.toDouble() },
             constant / number.toDouble()
         )
 
-    operator fun plus(expression: Expression): LinearExpression {
+    public operator fun plus(expression: Expression): LinearExpression {
         val rightCoefficients = expression.coefficients
         val newCoefficients = coefficients.toMutableMap()
         for ((variable, coefficient) in rightCoefficients) {
@@ -37,7 +37,7 @@ interface Expression {
         )
     }
 
-    operator fun minus(expression: Expression): LinearExpression {
+    public operator fun minus(expression: Expression): LinearExpression {
         val rightCoefficients = expression.coefficients
         val newCoefficients = coefficients.toMutableMap()
         for ((variable, coefficient) in rightCoefficients) {

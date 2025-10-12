@@ -433,8 +433,6 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
-    // TODO: may add boolean operations on bool variables - eg. and, or, oneOf, allOf, nOf etc.
-
     // Boolean operations
 
     public fun not(x: BooleanVariable, y: BooleanVariable): Constraint {
@@ -511,6 +509,71 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         other: BooleanVariable,
     ): Constraint {
         return constraint { this@xor + other eq 1 }
+    }
+
+    @JvmName("allOfVararg")
+    public fun allOf(vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() eq variables.size }
+    }
+
+    public fun Array<BooleanVariable>.allOf(): Constraint {
+        return constraint { this@allOf.sum() eq size }
+    }
+
+    public fun Collection<BooleanVariable>.allOf(): Constraint {
+        return constraint { this@allOf.sum() eq size }
+    }
+
+    @JvmName("noneOfVararg")
+    public fun noneOf(vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() eq 0 }
+    }
+
+    public fun Array<BooleanVariable>.noneOf(): Constraint {
+        return constraint { this@noneOf.sum() eq 0 }
+    }
+
+    public fun Iterable<BooleanVariable>.noneOf(): Constraint {
+        return constraint { this@noneOf.sum() eq 0 }
+    }
+
+    @JvmName("nOfVararg")
+    public fun nOf(n: Int, vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() eq n }
+    }
+
+    public fun Array<BooleanVariable>.nOf(n: Int): Constraint {
+        return constraint { this@nOf.sum() eq n }
+    }
+
+    public fun Iterable<BooleanVariable>.nOf(n: Int): Constraint {
+        return constraint { this@nOf.sum() eq n }
+    }
+
+    @JvmName("atLeastVararg")
+    public fun atLeast(n: Int, vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() ge n }
+    }
+
+    public fun Array<BooleanVariable>.atLeast(n: Int): Constraint {
+        return constraint { this@atLeast.sum() ge n }
+    }
+
+    public fun Iterable<BooleanVariable>.atLeast(n: Int): Constraint {
+        return constraint { this@atLeast.sum() ge n }
+    }
+
+    @JvmName("atMostVararg")
+    public fun atMost(n: Int, vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() le n }
+    }
+
+    public fun Array<BooleanVariable>.atMost(n: Int): Constraint {
+        return constraint { this@atMost.sum() le n }
+    }
+
+    public fun Iterable<BooleanVariable>.atMost(n: Int): Constraint {
+        return constraint { this@atMost.sum() le n }
     }
 
     // Configure constraints

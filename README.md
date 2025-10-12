@@ -67,6 +67,52 @@ y = 0.7999999999999999
 z = 1.0
 ```
 
+### Flow Network
+
+```kotlin
+val (status, config) = optimization {
+    solver(SolverType.GLOP_LINEAR_PROGRAMMING)
+
+    val totalCost = numVar("totalCost", lowerBound = 0.0)
+    val flows = tensorNumVar(
+        tensorKeys = listOf(nodes, nodes),
+        namePrefix = "flow",
+        lowerBound = 0,
+    )
+
+    min {
+        totalCost
+    }
+
+    "total cost constraint" {
+        totalCost eq nodes.flatMap { f ->
+            nodes.map { t ->
+                costTensor[f, t] * flows[f, t]
+            }
+        }.sum()
+    }
+
+    "initial flow constraint" {
+        nodes.map { z -> flows["s", z] }.sum() eq fGiven
+    }
+
+    for (v in nodesWithout) {
+        "Kirchhoff's law constraint - $v" {
+            nodes.map { z -> flows[v, z] }.sum() eq
+                    nodes.map { u -> flows[u, v] }.sum()
+        }
+    }
+
+    for (f in nodes) {
+        for (t in nodes) {
+            "max flow constraint - $f $t" {
+                flows[f, t] le capacityMinCostTensor[f, t]
+            }
+        }
+    }
+}
+```
+
 ## Installation
 
 Add the dependency to your **Maven** or **Gradle** project.

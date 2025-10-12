@@ -5,7 +5,7 @@ import com.google.ortools.linearsolver.MPObjective
 import com.google.ortools.linearsolver.MPSolver
 import com.google.ortools.linearsolver.MPVariable
 
-public class SolverConfiguration(
+public open class SolverConfiguration(
 
     public val solver: MPSolver,
 

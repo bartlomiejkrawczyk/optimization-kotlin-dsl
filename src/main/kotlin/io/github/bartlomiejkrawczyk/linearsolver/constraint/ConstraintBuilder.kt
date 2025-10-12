@@ -6,7 +6,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.expression.LinearExpression
 import io.github.bartlomiejkrawczyk.linearsolver.model.OptimizerExtensions
 
 @OptimizerDslMarker
-public class ConstraintBuilder(
+public open class ConstraintBuilder(
     private val name: String? = null,
 ) : OptimizerExtensions {
 

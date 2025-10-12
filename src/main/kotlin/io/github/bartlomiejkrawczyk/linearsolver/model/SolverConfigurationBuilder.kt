@@ -124,7 +124,7 @@ public interface OptimizerExtensions {
 }
 
 @OptimizerDslMarker
-public class SolverConfigurationBuilder : OptimizerExtensions {
+public open class SolverConfigurationBuilder : OptimizerExtensions {
 
     public var tolerance: Double = 1e-7
 

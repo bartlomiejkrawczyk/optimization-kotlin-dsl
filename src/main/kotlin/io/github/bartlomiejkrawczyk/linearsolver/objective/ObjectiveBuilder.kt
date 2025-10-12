@@ -5,7 +5,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.expression.Expression
 import io.github.bartlomiejkrawczyk.linearsolver.model.OptimizerExtensions
 
 @OptimizerDslMarker
-public class ObjectiveBuilder : OptimizerExtensions {
+public open class ObjectiveBuilder : OptimizerExtensions {
 
     public infix fun Expression.to(goal: Goal): Objective {
         return Objective(

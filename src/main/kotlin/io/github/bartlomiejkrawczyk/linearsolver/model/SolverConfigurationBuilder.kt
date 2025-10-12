@@ -431,6 +431,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    public infix fun Number.le(other: Expression): Constraint {
+        val constraint = Constraint(
+            left = LinearExpression(constant = this@le.toDouble()),
+            right = other,
+            relationship = Relationship.LESS_EQUALS,
+        )
+        constraints += constraint
+        return constraint
+    }
+
     public infix fun Expression.eq(value: Number): Constraint {
         val constraint = Constraint(
             left = this@eq,
@@ -451,6 +461,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    public infix fun Number.eq(other: Expression): Constraint {
+        val constraint = Constraint(
+            left = LinearExpression(constant = this@eq.toDouble()),
+            right = other,
+            relationship = Relationship.EQUALS,
+        )
+        constraints += constraint
+        return constraint
+    }
+
     public infix fun Expression.ge(value: Number): Constraint {
         val constraint = Constraint(
             left = this@ge,
@@ -464,6 +484,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     public infix fun Expression.ge(other: Expression): Constraint {
         val constraint = Constraint(
             left = this@ge,
+            right = other,
+            relationship = Relationship.GREATER_EQUALS,
+        )
+        constraints += constraint
+        return constraint
+    }
+
+    public infix fun Number.ge(other: Expression): Constraint {
+        val constraint = Constraint(
+            left = LinearExpression(constant = this@ge.toDouble()),
             right = other,
             relationship = Relationship.GREATER_EQUALS,
         )

@@ -28,6 +28,15 @@ public open class ConstraintBuilder(
         )
     }
 
+    public infix fun Number.le(other: Expression): Constraint {
+        return Constraint(
+            name = name,
+            left = LinearExpression(constant = this@le.toDouble()),
+            right = other,
+            relationship = Relationship.LESS_EQUALS,
+        )
+    }
+
     public infix fun Expression.eq(value: Number): Constraint {
         return Constraint(
             name = name,
@@ -46,6 +55,15 @@ public open class ConstraintBuilder(
         )
     }
 
+    public infix fun Number.eq(other: Expression): Constraint {
+        return Constraint(
+            name = name,
+            left = LinearExpression(constant = this@eq.toDouble()),
+            right = other,
+            relationship = Relationship.EQUALS,
+        )
+    }
+
     public infix fun Expression.ge(value: Number): Constraint {
         return Constraint(
             name = name,
@@ -59,6 +77,15 @@ public open class ConstraintBuilder(
         return Constraint(
             name = name,
             left = this@ge,
+            right = other,
+            relationship = Relationship.GREATER_EQUALS,
+        )
+    }
+
+    public infix fun Number.ge(other: Expression): Constraint {
+        return Constraint(
+            name = name,
+            left = LinearExpression(constant = this@ge.toDouble()),
             right = other,
             relationship = Relationship.GREATER_EQUALS,
         )

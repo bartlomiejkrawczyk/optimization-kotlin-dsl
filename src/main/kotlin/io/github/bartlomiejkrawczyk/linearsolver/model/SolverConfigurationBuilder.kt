@@ -300,6 +300,28 @@ public class SolverConfigurationBuilder : OptimizerExtensions {
         return newObjective
     }
 
+    public fun maxmin(vararg expressions: Expression): Triple<Objective, Variable, List<Constraint>> {
+        val newVariable = numVar()
+        val constraints = expressions.map { expression ->
+            newVariable le expression
+        }
+        val objective = max {
+            newVariable
+        }
+        return Triple(objective, newVariable, constraints)
+    }
+
+    public fun minmax(vararg expressions: Expression): Triple<Objective, Variable, List<Constraint>> {
+        val newVariable = numVar()
+        val constraints = expressions.map { expression ->
+            newVariable ge expression
+        }
+        val objective = min {
+            newVariable
+        }
+        return Triple(objective, newVariable, constraints)
+    }
+
     public fun objective(block: ObjectiveBuilder.() -> Objective): Objective {
         val builder = ObjectiveBuilder()
         val newObjective = builder.block()

@@ -18,11 +18,14 @@ import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 public interface OptimizerExtensions {
     // Number extensions for building expressions
 
-    public infix fun Number.x(value: Int): Parameter = Parameter(coefficient = toDouble(), name = VariableName("x$value"))
+    public infix fun Number.x(value: Int): Parameter =
+        Parameter(coefficient = toDouble(), name = VariableName("x$value"))
 
-    public infix fun Number.x(name: String): Parameter = Parameter(coefficient = toDouble(), name = VariableName(name))
+    public infix fun Number.x(name: String): Parameter =
+        Parameter(coefficient = toDouble(), name = VariableName(name))
 
-    public infix fun Number.x(variable: Variable): Parameter = Parameter(coefficient = toDouble(), name = variable.name)
+    public infix fun Number.x(variable: Variable): Parameter =
+        Parameter(coefficient = toDouble(), name = variable.name)
 
     public operator fun Number.times(variable: Variable): Parameter =
         Parameter(coefficient = toDouble(), name = variable.name)
@@ -189,6 +192,22 @@ public class SolverConfigurationBuilder : OptimizerExtensions {
         }
         variables[variable.name] = variable
         return variable
+    }
+
+    public fun maxVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
+        val newVariable = numVar()
+        val constraints = expressions.map { expression ->
+            newVariable ge expression
+        }
+        return newVariable to constraints
+    }
+
+    public fun minVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
+        val newVariable = numVar()
+        val constraints = expressions.map { expression ->
+            newVariable le expression
+        }
+        return newVariable to constraints
     }
 
     // TODO: configure array of variables

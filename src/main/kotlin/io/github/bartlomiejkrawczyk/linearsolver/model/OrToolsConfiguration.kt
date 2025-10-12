@@ -5,9 +5,13 @@ import com.google.ortools.linearsolver.MPObjective
 import com.google.ortools.linearsolver.MPSolver
 import com.google.ortools.linearsolver.MPVariable
 
-public open class SolverConfiguration(
-    override val solver: MPSolver,
-    override val variables: List<MPVariable>,
-    override val constraints: List<MPConstraint>,
-    override val objective: MPObjective,
-) : OrToolsConfiguration
+public interface OrToolsConfiguration {
+
+    public val solver: MPSolver
+
+    public val variables: List<MPVariable>
+
+    public val constraints: List<MPConstraint>
+
+    public val objective: MPObjective
+}

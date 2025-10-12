@@ -2,7 +2,7 @@ package io.github.bartlomiejkrawczyk.linearsolver.tensor
 
 public open class NamedTensor<K, V>(
     public val keys: List<List<K>> = listOf(listOf()),
-    public val values: Map<K, Any> = mutableMapOf(),
+    public val values: Map<K, Any> = mapOf(),
     public val defaultValueProvider: (keys: List<K>) -> V = { throw NotImplementedError() },
 ) {
 

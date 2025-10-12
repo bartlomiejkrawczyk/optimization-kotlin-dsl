@@ -1,6 +1,16 @@
 package io.github.bartlomiejkrawczyk.linearsolver.objective
 
-// TODO: return solution instead of current impl
+import com.google.ortools.linearsolver.MPSolver
+import io.github.bartlomiejkrawczyk.linearsolver.model.OrToolsConfiguration
+import io.github.bartlomiejkrawczyk.linearsolver.model.SolverConfiguration
+import io.github.bartlomiejkrawczyk.linearsolver.model.SolverConfigurationBuilder
+
 public data class Solution(
-    val optimal: Boolean,
-)
+    public val status: MPSolver.ResultStatus,
+    public val config: SolverConfiguration,
+    public val builder: SolverConfigurationBuilder,
+) : OrToolsConfiguration by config {
+
+    val objectiveValue: Double
+        get() = config.objective.value()
+}

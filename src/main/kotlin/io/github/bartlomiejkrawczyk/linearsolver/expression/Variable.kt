@@ -22,7 +22,7 @@ public interface Variable : Expression {
         return Parameter(this.name, 1.0 / number.toDouble())
     }
 
-    public operator fun plus(number: Number): LinearExpression {
+    public override operator fun plus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(
                 name to 1.0,
@@ -64,7 +64,7 @@ public interface Variable : Expression {
         )
     }
 
-    public operator fun minus(number: Number): LinearExpression {
+    public override operator fun minus(number: Number): LinearExpression {
         return LinearExpression(
             coefficients = mapOf(
                 name to 1.0,

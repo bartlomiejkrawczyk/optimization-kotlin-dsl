@@ -28,6 +28,7 @@ public interface OptimizerExtensions {
     public infix fun Number.x(variable: Variable): Parameter =
         Parameter(coefficient = toDouble(), name = variable.name)
 
+    // TODO: may optimize multiplication by 0
     public operator fun Number.times(variable: Variable): Parameter =
         Parameter(coefficient = toDouble(), name = variable.name)
 
@@ -151,7 +152,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         name: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): Variable {
+    ): IntegerVariable {
         val variableName = name ?: "x${sequence++}"
         val variable = IntegerVariable(
             name = VariableName(variableName),
@@ -169,7 +170,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         name: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): Variable {
+    ): NumericVariable {
         val variableName = name ?: "x${sequence++}"
         val variable = NumericVariable(
             name = VariableName(variableName),
@@ -185,7 +186,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
 
     public fun boolVar(
         name: String? = null,
-    ): Variable {
+    ): BooleanVariable {
         val variableName = name ?: "x${sequence++}"
         val variable = BooleanVariable(
             name = VariableName(variableName),
@@ -200,7 +201,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     public fun <T> vectorBoolVar(
         vectorKeys: List<T>,
         namePrefix: String? = null,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, BooleanVariable> {
         return vectorVar(
             vectorKeys = vectorKeys,
             namePrefix = namePrefix,
@@ -217,7 +218,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         namePrefix: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, IntegerVariable> {
         return vectorVar(
             vectorKeys = vectorKeys,
             namePrefix = namePrefix,
@@ -236,7 +237,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         namePrefix: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, NumericVariable> {
         return vectorVar(
             vectorKeys = vectorKeys,
             namePrefix = namePrefix,
@@ -250,11 +251,11 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
-    public fun <T> vectorVar(
+    public fun <T, V : Variable> vectorVar(
         vectorKeys: List<T>,
         namePrefix: String? = null,
-        variableProvider: (String) -> Variable,
-    ): NamedTensor<T, Variable> {
+        variableProvider: (String) -> V,
+    ): NamedTensor<T, V> {
         return tensorVar(
             tensorKeys = listOf(vectorKeys),
             namePrefix = namePrefix,
@@ -265,7 +266,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     public fun <T> tensorBoolVar(
         tensorKeys: List<List<T>>,
         namePrefix: String? = null,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, BooleanVariable> {
         return tensorVar(
             tensorKeys = tensorKeys,
             namePrefix = namePrefix,
@@ -282,7 +283,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         namePrefix: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, IntegerVariable> {
         return tensorVar(
             tensorKeys = tensorKeys,
             namePrefix = namePrefix,
@@ -301,7 +302,7 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         namePrefix: String? = null,
         lowerBound: Number = Double.NEGATIVE_INFINITY,
         upperBound: Number = Double.POSITIVE_INFINITY,
-    ): NamedTensor<T, Variable> {
+    ): NamedTensor<T, NumericVariable> {
         return tensorVar(
             tensorKeys = tensorKeys,
             namePrefix = namePrefix,
@@ -316,11 +317,11 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     }
 
     @Suppress("UNCHECKED_CAST")
-    public fun <T> tensorVar(
+    public fun <T, V : Variable> tensorVar(
         tensorKeys: List<List<T>>,
         namePrefix: String? = null,
-        variableProvider: (String) -> Variable,
-    ): NamedTensor<T, Variable> {
+        variableProvider: (String) -> V,
+    ): NamedTensor<T, V> {
         val tensorVariables = mutableMapOf<T, Any>()
 
         for (tuple in cartesianProduct(tensorKeys)) {
@@ -343,18 +344,100 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
-    public fun maxVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
-        val newVariable = numVar()
-        val constraints = expressions.map { expression ->
-            newVariable ge expression
+    public fun notVar(other: BooleanVariable, name: String? = null): Pair<BooleanVariable, Constraint> {
+        val newVariable = boolVar(name = name)
+        val constraint = constraint {
+            newVariable eq 1 - other
+        }
+        return newVariable to constraint
+    }
+
+    public fun andVar(
+        first: BooleanVariable,
+        second: BooleanVariable,
+        name: String? = null,
+    ): Pair<BooleanVariable, List<Constraint>> {
+        val newVariable = boolVar(name = name)
+        val constraints = listOf(
+            constraint { newVariable le first },
+            constraint { newVariable le second },
+            constraint { newVariable ge first + second - 1 },
+        )
+        return newVariable to constraints
+    }
+
+    public fun andVar(
+        vararg variables: BooleanVariable,
+        name: String? = null,
+    ): Pair<BooleanVariable, List<Constraint>> {
+        val newVariable = boolVar(name = name)
+        val constraints = variables.map { variable ->
+            constraint { newVariable le variable }
+        }.toMutableList()
+        constraints += constraint {
+            newVariable ge variables.sum() - (variables.size - 1)
         }
         return newVariable to constraints
     }
 
+    public fun orVar(
+        first: BooleanVariable,
+        second: BooleanVariable,
+        name: String? = null,
+    ): Pair<BooleanVariable, List<Constraint>> {
+        val newVariable = boolVar(name = name)
+        val constraints = listOf(
+            constraint { newVariable ge first },
+            constraint { newVariable ge second },
+            constraint { newVariable le first + second },
+        )
+        return newVariable to constraints
+    }
+
+    public fun orVar(
+        vararg variables: BooleanVariable,
+        name: String? = null,
+    ): Pair<BooleanVariable, List<Constraint>> {
+        val newVariable = boolVar(name = name)
+        val constraints = variables.map { variable ->
+            constraint { newVariable ge variable }
+        }.toMutableList()
+        constraints += constraint {
+            newVariable le variables.sum()
+        }
+        return newVariable to constraints
+    }
+
+    public fun xorVars(
+        first: BooleanVariable,
+        second: BooleanVariable,
+    ): Triple<BooleanVariable, BooleanVariable, List<Constraint>> {
+        val (andVar, andConstraints) = andVar(first, second)
+        val xorVar = boolVar()
+        val xorConstraints = listOf(
+            constraint { xorVar eq first + second - 2 * andVar }
+        )
+        return Triple(xorVar, andVar, (xorConstraints + andConstraints))
+    }
+
+    /**
+     * To make sure this var is minimal you have to minimize this value in the objective.
+     */
+    public fun maxVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
+        val newVariable = numVar()
+        val constraints = expressions.map { expression ->
+            constraint { newVariable ge expression }
+        }
+        return newVariable to constraints
+    }
+
+    /**
+     * To make sure this var is minimal you have to maximize this value in the objective.
+     */
     public fun minVar(vararg expressions: Expression): Pair<Variable, List<Constraint>> {
         val newVariable = numVar()
         val constraints = expressions.map { expression ->
-            newVariable le expression
+            constraint { newVariable le expression }
         }
         return newVariable to constraints
     }
@@ -378,8 +461,148 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         )
     }
 
-    // TODO: configure array of variables
-    // TODO: may add boolean operations on bool variables - eg. and, or, oneOf, allOf, nOf etc.
+    // Boolean operations
+
+    public fun not(x: BooleanVariable, y: BooleanVariable): Constraint {
+        val constraint = constraint {
+            y eq 1 - x
+        }
+        return constraint
+    }
+
+    public infix fun BooleanVariable.notEq(other: BooleanVariable): Constraint {
+        val constraint = constraint {
+            other eq 1 - this@notEq
+        }
+        return constraint
+    }
+
+    public fun and(
+        first: BooleanVariable,
+        second: BooleanVariable,
+    ): List<Constraint> {
+        val constraints = listOf(
+            constraint { 1.0 le first },
+            constraint { 1.0 le second },
+            constraint { 1.0 ge first + second - 1 },
+        )
+        return constraints
+    }
+
+    @JvmName("infixAnd")
+    public infix fun BooleanVariable.and(
+        other: BooleanVariable,
+    ): List<Constraint> {
+        val constraints = listOf(
+            constraint { 1.0 le this@and },
+            constraint { 1.0 le other },
+            constraint { 1.0 ge this@and + other - 1 },
+        )
+        return constraints
+    }
+
+    public fun or(
+        first: BooleanVariable,
+        second: BooleanVariable,
+    ): List<Constraint> {
+        val constraints = listOf(
+            constraint { 1.0 ge first },
+            constraint { 1.0 ge second },
+            constraint { 1.0 le first + second },
+        )
+        return constraints
+    }
+
+    @JvmName("infixOr")
+    public infix fun BooleanVariable.or(
+        other: BooleanVariable,
+    ): List<Constraint> {
+        val constraints = listOf(
+            constraint { 1.0 ge this@or },
+            constraint { 1.0 ge other },
+            constraint { 1.0 le this@or + other },
+        )
+        return constraints
+    }
+
+    public fun xor(
+        first: BooleanVariable,
+        second: BooleanVariable,
+    ): Constraint {
+        return constraint { first + second eq 1 }
+    }
+
+    @JvmName("infixXor")
+    public infix fun BooleanVariable.xor(
+        other: BooleanVariable,
+    ): Constraint {
+        return constraint { this@xor + other eq 1 }
+    }
+
+    @JvmName("allOfVararg")
+    public fun allOf(vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() eq variables.size }
+    }
+
+    public fun Array<BooleanVariable>.allOf(): Constraint {
+        return constraint { this@allOf.sum() eq size }
+    }
+
+    public fun Collection<BooleanVariable>.allOf(): Constraint {
+        return constraint { this@allOf.sum() eq size }
+    }
+
+    @JvmName("noneOfVararg")
+    public fun noneOf(vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() eq 0 }
+    }
+
+    public fun Array<BooleanVariable>.noneOf(): Constraint {
+        return constraint { this@noneOf.sum() eq 0 }
+    }
+
+    public fun Iterable<BooleanVariable>.noneOf(): Constraint {
+        return constraint { this@noneOf.sum() eq 0 }
+    }
+
+    @JvmName("nOfVararg")
+    public fun nOf(n: Int, vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() eq n }
+    }
+
+    public fun Array<BooleanVariable>.nOf(n: Int): Constraint {
+        return constraint { this@nOf.sum() eq n }
+    }
+
+    public fun Iterable<BooleanVariable>.nOf(n: Int): Constraint {
+        return constraint { this@nOf.sum() eq n }
+    }
+
+    @JvmName("atLeastVararg")
+    public fun atLeast(n: Int, vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() ge n }
+    }
+
+    public fun Array<BooleanVariable>.atLeast(n: Int): Constraint {
+        return constraint { this@atLeast.sum() ge n }
+    }
+
+    public fun Iterable<BooleanVariable>.atLeast(n: Int): Constraint {
+        return constraint { this@atLeast.sum() ge n }
+    }
+
+    @JvmName("atMostVararg")
+    public fun atMost(n: Int, vararg variables: BooleanVariable): Constraint {
+        return constraint { variables.sum() le n }
+    }
+
+    public fun Array<BooleanVariable>.atMost(n: Int): Constraint {
+        return constraint { this@atMost.sum() le n }
+    }
+
+    public fun Iterable<BooleanVariable>.atMost(n: Int): Constraint {
+        return constraint { this@atMost.sum() le n }
+    }
 
     // Configure constraints
 
@@ -431,6 +654,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    public infix fun Number.le(other: Expression): Constraint {
+        val constraint = Constraint(
+            left = LinearExpression(constant = this@le.toDouble()),
+            right = other,
+            relationship = Relationship.LESS_EQUALS,
+        )
+        constraints += constraint
+        return constraint
+    }
+
     public infix fun Expression.eq(value: Number): Constraint {
         val constraint = Constraint(
             left = this@eq,
@@ -451,6 +684,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
         return constraint
     }
 
+    public infix fun Number.eq(other: Expression): Constraint {
+        val constraint = Constraint(
+            left = LinearExpression(constant = this@eq.toDouble()),
+            right = other,
+            relationship = Relationship.EQUALS,
+        )
+        constraints += constraint
+        return constraint
+    }
+
     public infix fun Expression.ge(value: Number): Constraint {
         val constraint = Constraint(
             left = this@ge,
@@ -464,6 +707,16 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     public infix fun Expression.ge(other: Expression): Constraint {
         val constraint = Constraint(
             left = this@ge,
+            right = other,
+            relationship = Relationship.GREATER_EQUALS,
+        )
+        constraints += constraint
+        return constraint
+    }
+
+    public infix fun Number.ge(other: Expression): Constraint {
+        val constraint = Constraint(
+            left = LinearExpression(constant = this@ge.toDouble()),
             right = other,
             relationship = Relationship.GREATER_EQUALS,
         )

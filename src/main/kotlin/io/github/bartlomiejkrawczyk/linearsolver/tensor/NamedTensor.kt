@@ -70,6 +70,14 @@ public open class NamedTensor<K, V>(
      * Returns a sub-tensor defined by the given partial key prefix.
      * Wildcards ("*") expand to all allowed keys in that dimension.
      */
+    public fun subTensor(vararg partialKeys: K): NamedTensor<K, V> {
+        return subTensor(partialKeys.toList())
+    }
+
+    /**
+     * Returns a sub-tensor defined by the given partial key prefix.
+     * Wildcards ("*") expand to all allowed keys in that dimension.
+     */
     @Suppress("UNCHECKED_CAST")
     public fun subTensor(partialKeys: List<K>): NamedTensor<K, V> {
         fun recurse(

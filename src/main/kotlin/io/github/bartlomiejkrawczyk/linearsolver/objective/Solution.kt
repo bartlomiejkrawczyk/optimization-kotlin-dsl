@@ -1,6 +1,7 @@
 package io.github.bartlomiejkrawczyk.linearsolver.objective
 
 import com.google.ortools.linearsolver.MPSolver
+import io.github.bartlomiejkrawczyk.linearsolver.expression.NumericVariable
 import io.github.bartlomiejkrawczyk.linearsolver.expression.Variable
 import io.github.bartlomiejkrawczyk.linearsolver.expression.VariableName
 import io.github.bartlomiejkrawczyk.linearsolver.model.OrToolsConfiguration
@@ -79,10 +80,13 @@ public data class Solution(
                 appendLine("    ${variable.name()} = ${variable.solutionValue()}")
             }
             appendLine("  Constraints:")
+            val isContinuous = builder.variables.none { it !is NumericVariable }
             for (constraint in builder.constraints) {
                 appendLine("    $constraint")
-                appendLine("      dualValue = ${constraint.dualValue}")
-                appendLine("      basisStatus = ${constraint.basisStatus}")
+                if (isContinuous) {
+                    appendLine("      dualValue = ${constraint.dualValue}")
+                    appendLine("      basisStatus = ${constraint.basisStatus}")
+                }
             }
         }
     }

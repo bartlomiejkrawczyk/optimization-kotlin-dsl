@@ -10,7 +10,7 @@ class MixedIntegerProblemTest {
 
     @Test
     fun `optimization problem should be optimal`() {
-        val solution = optimization {
+        val solution = solve {
             solver(SolverType.SCIP_MIXED_INTEGER_PROGRAMMING)
 
             val x = intVar("x")

@@ -1,6 +1,8 @@
 package io.github.bartlomiejkrawczyk.linearsolver.expression
 
+import com.google.ortools.linearsolver.MPVariable
 import java.io.Serializable
+import kotlin.math.roundToInt
 
 /**
  * Represents the symbolic name of a decision variable in an optimization model.
@@ -10,7 +12,9 @@ import java.io.Serializable
  * @property value The string name of the variable.
  */
 @JvmInline
-public value class VariableName(public val value: String) : Serializable
+public value class VariableName(public val value: String) : Serializable {
+    override fun toString(): String = value
+}
 
 /**
  * Represents a variable term in an optimization expression.
@@ -41,6 +45,34 @@ public interface Variable : Expression {
      */
     override val coefficients: Map<VariableName, Double>
         get() = mapOf(name to 1.0)
+
+    /**
+     * The underlying solver variable associated with this variable.
+     */
+    public var variable: MPVariable?
+
+    /**
+     * Returns the value of the variable in the current solution.
+     *
+     * If the variable is integer, then the value will always be an integer (the
+     * underlying solver handles floating-point values only, but this function
+     * automatically rounds it to the nearest integer; see: man 3 round).
+     */
+    public val solutionValue: Double
+        get() = (variable ?: throw IllegalStateException("Variable $name has not been assigned an MPVariable yet"))
+            .solutionValue()
+
+    /**
+     * Returns the boolean interpretation of the variable's solution value.
+     */
+    public val booleanValue: Boolean
+        get() = solutionValue >= 0.5
+
+    /**
+     * Returns the integer interpretation of the variable's solution value.
+     */
+    public val integerValue: Int
+        get() = solutionValue.roundToInt()
 
     /**
      * Negates the variable, producing a [Parameter] with a coefficient of `-1.0`.
@@ -268,7 +300,15 @@ public interface Variable : Expression {
  */
 public open class BooleanVariable(
     override val name: VariableName,
-) : Variable
+    override var variable: MPVariable? = null,
+) : Variable {
+    override fun toString(): String = "(bool) $name"
+}
+
+public interface BoundedVariable : Variable {
+    public val lowerBound: Double
+    public val upperBound: Double
+}
 
 /**
  * Represents an integer decision variable with optional bounds.
@@ -284,9 +324,12 @@ public open class BooleanVariable(
  */
 public open class IntegerVariable(
     override val name: VariableName,
-    public val lowerBound: Double = Double.NEGATIVE_INFINITY,
-    public val upperBound: Double = Double.POSITIVE_INFINITY,
-) : Variable
+    override val lowerBound: Double = Double.NEGATIVE_INFINITY,
+    override val upperBound: Double = Double.POSITIVE_INFINITY,
+    override var variable: MPVariable? = null,
+) : BoundedVariable {
+    override fun toString(): String = "(int) $name"
+}
 
 /**
  * Represents a continuous (numeric) decision variable with optional bounds.
@@ -302,6 +345,9 @@ public open class IntegerVariable(
  */
 public open class NumericVariable(
     override val name: VariableName,
-    public val lowerBound: Double = Double.NEGATIVE_INFINITY,
-    public val upperBound: Double = Double.POSITIVE_INFINITY,
-) : Variable
+    override val lowerBound: Double = Double.NEGATIVE_INFINITY,
+    override val upperBound: Double = Double.POSITIVE_INFINITY,
+    override var variable: MPVariable? = null,
+) : BoundedVariable {
+    override fun toString(): String = name.toString()
+}

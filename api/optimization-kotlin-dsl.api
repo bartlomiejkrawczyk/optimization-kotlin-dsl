@@ -1,25 +1,31 @@
 public final class io/github/bartlomiejkrawczyk/linearsolver/OptimizerDSLKt {
-	public static final fun optimization (Lkotlin/jvm/functions/Function1;)Lio/github/bartlomiejkrawczyk/linearsolver/objective/Solution;
+	public static final fun optimize (Lkotlin/jvm/functions/Function1;)Ljava/lang/Object;
+	public static final fun solve (Lkotlin/jvm/functions/Function1;)Lio/github/bartlomiejkrawczyk/linearsolver/objective/Solution;
 }
 
 public abstract interface annotation class io/github/bartlomiejkrawczyk/linearsolver/OptimizerDslMarker : java/lang/annotation/Annotation {
 }
 
 public final class io/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint {
-	public fun <init> (Ljava/lang/String;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;Lcom/google/ortools/linearsolver/MPConstraint;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;Lcom/google/ortools/linearsolver/MPConstraint;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public final fun component3 ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public final fun component4 ()Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;
-	public final fun copy (Ljava/lang/String;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
-	public static synthetic fun copy$default (Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;Ljava/lang/String;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;ILjava/lang/Object;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
+	public final fun component5 ()Lcom/google/ortools/linearsolver/MPConstraint;
+	public final fun copy (Ljava/lang/String;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;Lcom/google/ortools/linearsolver/MPConstraint;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
+	public static synthetic fun copy$default (Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;Ljava/lang/String;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;Lcom/google/ortools/linearsolver/MPConstraint;ILjava/lang/Object;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBasisStatus ()Lcom/google/ortools/linearsolver/MPSolver$BasisStatus;
+	public final fun getConstraint ()Lcom/google/ortools/linearsolver/MPConstraint;
+	public final fun getDualValue ()D
 	public final fun getLeft ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getRelationship ()Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;
 	public final fun getRight ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun hashCode ()I
+	public final fun setConstraint (Lcom/google/ortools/linearsolver/MPConstraint;)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -95,12 +101,17 @@ public final class io/github/bartlomiejkrawczyk/linearsolver/constraint/Relation
 }
 
 public class io/github/bartlomiejkrawczyk/linearsolver/expression/BooleanVariable : io/github/bartlomiejkrawczyk/linearsolver/expression/Variable {
-	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/google/ortools/linearsolver/MPVariable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/google/ortools/linearsolver/MPVariable;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun div (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun div (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
+	public fun getBooleanValue ()Z
 	public fun getCoefficients ()Ljava/util/Map;
 	public fun getConstant ()D
+	public fun getIntegerValue ()I
 	public fun getName-oj5TYo4 ()Ljava/lang/String;
+	public fun getSolutionValue ()D
+	public fun getVariable ()Lcom/google/ortools/linearsolver/MPVariable;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
@@ -109,9 +120,35 @@ public class io/github/bartlomiejkrawczyk/linearsolver/expression/BooleanVariabl
 	public fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun plus (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public fun setVariable (Lcom/google/ortools/linearsolver/MPVariable;)V
 	public fun times (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
+	public fun toString ()Ljava/lang/String;
 	public synthetic fun unaryMinus ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun unaryMinus ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
+}
+
+public abstract interface class io/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable : io/github/bartlomiejkrawczyk/linearsolver/expression/Variable {
+	public abstract fun getLowerBound ()D
+	public abstract fun getUpperBound ()D
+}
+
+public final class io/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable$DefaultImpls {
+	public static fun div (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
+	public static fun getBooleanValue (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;)Z
+	public static fun getCoefficients (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;)Ljava/util/Map;
+	public static fun getConstant (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;)D
+	public static fun getIntegerValue (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;)I
+	public static fun getSolutionValue (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;)D
+	public static fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public static fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
+	public static fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
+	public static fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public static fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public static fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
+	public static fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
+	public static fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public static fun times (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
+	public static fun unaryMinus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
 }
 
 public abstract interface class io/github/bartlomiejkrawczyk/linearsolver/expression/Expression {
@@ -137,16 +174,20 @@ public final class io/github/bartlomiejkrawczyk/linearsolver/expression/Expressi
 	public static fun unaryMinus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 }
 
-public class io/github/bartlomiejkrawczyk/linearsolver/expression/IntegerVariable : io/github/bartlomiejkrawczyk/linearsolver/expression/Variable {
-	public synthetic fun <init> (Ljava/lang/String;DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/lang/String;DDLkotlin/jvm/internal/DefaultConstructorMarker;)V
+public class io/github/bartlomiejkrawczyk/linearsolver/expression/IntegerVariable : io/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable {
+	public synthetic fun <init> (Ljava/lang/String;DDLcom/google/ortools/linearsolver/MPVariable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;DDLcom/google/ortools/linearsolver/MPVariable;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun div (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun div (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
+	public fun getBooleanValue ()Z
 	public fun getCoefficients ()Ljava/util/Map;
 	public fun getConstant ()D
-	public final fun getLowerBound ()D
+	public fun getIntegerValue ()I
+	public fun getLowerBound ()D
 	public fun getName-oj5TYo4 ()Ljava/lang/String;
-	public final fun getUpperBound ()D
+	public fun getSolutionValue ()D
+	public fun getUpperBound ()D
+	public fun getVariable ()Lcom/google/ortools/linearsolver/MPVariable;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
@@ -155,7 +196,9 @@ public class io/github/bartlomiejkrawczyk/linearsolver/expression/IntegerVariabl
 	public fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun plus (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public fun setVariable (Lcom/google/ortools/linearsolver/MPVariable;)V
 	public fun times (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
+	public fun toString ()Ljava/lang/String;
 	public synthetic fun unaryMinus ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun unaryMinus ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
 }
@@ -182,16 +225,20 @@ public final class io/github/bartlomiejkrawczyk/linearsolver/expression/LinearEx
 	public fun unaryMinus ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 }
 
-public class io/github/bartlomiejkrawczyk/linearsolver/expression/NumericVariable : io/github/bartlomiejkrawczyk/linearsolver/expression/Variable {
-	public synthetic fun <init> (Ljava/lang/String;DDILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/lang/String;DDLkotlin/jvm/internal/DefaultConstructorMarker;)V
+public class io/github/bartlomiejkrawczyk/linearsolver/expression/NumericVariable : io/github/bartlomiejkrawczyk/linearsolver/expression/BoundedVariable {
+	public synthetic fun <init> (Ljava/lang/String;DDLcom/google/ortools/linearsolver/MPVariable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;DDLcom/google/ortools/linearsolver/MPVariable;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun div (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun div (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
+	public fun getBooleanValue ()Z
 	public fun getCoefficients ()Ljava/util/Map;
 	public fun getConstant ()D
-	public final fun getLowerBound ()D
+	public fun getIntegerValue ()I
+	public fun getLowerBound ()D
 	public fun getName-oj5TYo4 ()Ljava/lang/String;
-	public final fun getUpperBound ()D
+	public fun getSolutionValue ()D
+	public fun getUpperBound ()D
+	public fun getVariable ()Lcom/google/ortools/linearsolver/MPVariable;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
@@ -200,7 +247,9 @@ public class io/github/bartlomiejkrawczyk/linearsolver/expression/NumericVariabl
 	public fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun plus (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public fun setVariable (Lcom/google/ortools/linearsolver/MPVariable;)V
 	public fun times (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
+	public fun toString ()Ljava/lang/String;
 	public synthetic fun unaryMinus ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun unaryMinus ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
 }
@@ -235,8 +284,12 @@ public final class io/github/bartlomiejkrawczyk/linearsolver/expression/Paramete
 
 public abstract interface class io/github/bartlomiejkrawczyk/linearsolver/expression/Variable : io/github/bartlomiejkrawczyk/linearsolver/expression/Expression {
 	public abstract fun div (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
+	public abstract fun getBooleanValue ()Z
 	public abstract fun getCoefficients ()Ljava/util/Map;
+	public abstract fun getIntegerValue ()I
 	public abstract fun getName-oj5TYo4 ()Ljava/lang/String;
+	public abstract fun getSolutionValue ()D
+	public abstract fun getVariable ()Lcom/google/ortools/linearsolver/MPVariable;
 	public abstract fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
 	public abstract fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public abstract fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
@@ -245,14 +298,18 @@ public abstract interface class io/github/bartlomiejkrawczyk/linearsolver/expres
 	public abstract fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public abstract fun plus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public abstract fun plus (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public abstract fun setVariable (Lcom/google/ortools/linearsolver/MPVariable;)V
 	public abstract fun times (Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public abstract fun unaryMinus ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
 }
 
 public final class io/github/bartlomiejkrawczyk/linearsolver/expression/Variable$DefaultImpls {
 	public static fun div (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;
+	public static fun getBooleanValue (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Z
 	public static fun getCoefficients (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Ljava/util/Map;
 	public static fun getConstant (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)D
+	public static fun getIntegerValue (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)I
+	public static fun getSolutionValue (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)D
 	public static fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
 	public static fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public static fun minus (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
@@ -364,6 +421,7 @@ public class io/github/bartlomiejkrawczyk/linearsolver/model/SolverConfiguration
 	public final fun boolVar (Ljava/lang/String;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/BooleanVariable;
 	public static synthetic fun boolVar$default (Lio/github/bartlomiejkrawczyk/linearsolver/model/SolverConfigurationBuilder;Ljava/lang/String;ILjava/lang/Object;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/BooleanVariable;
 	public final fun build ()Lio/github/bartlomiejkrawczyk/linearsolver/model/SolverConfiguration;
+	public final fun clear ()V
 	public final fun constraint (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Relationship;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
 	public final fun constraint (Lkotlin/jvm/functions/Function1;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
 	public final fun eq (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
@@ -373,9 +431,12 @@ public class io/github/bartlomiejkrawczyk/linearsolver/model/SolverConfiguration
 	public final fun ge (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
 	public final fun ge (Ljava/lang/Number;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
 	public final fun getConstraints ()Ljava/util/List;
+	public final fun getNumThreads ()Ljava/lang/Integer;
 	public final fun getObjective ()Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;
 	public final fun getSequence ()I
 	public final fun getSolver ()Lio/github/bartlomiejkrawczyk/linearsolver/solver/SolverType;
+	public final fun getSolverInstance ()Lcom/google/ortools/linearsolver/MPSolver;
+	public final fun getStatus ()Lcom/google/ortools/linearsolver/MPSolver$ResultStatus;
 	public final fun getTolerance ()D
 	public final fun getVariables ()Ljava/util/Map;
 	public final fun infixAnd (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BooleanVariable;Lio/github/bartlomiejkrawczyk/linearsolver/expression/BooleanVariable;)Ljava/util/List;
@@ -419,10 +480,19 @@ public class io/github/bartlomiejkrawczyk/linearsolver/model/SolverConfiguration
 	public fun plus (Ljava/lang/Number;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
 	public fun plus (Ljava/lang/Number;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
 	public fun plus (Ljava/lang/Number;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/LinearExpression;
+	public final fun print ()V
+	public final fun requireFalse (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BooleanVariable;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
+	public final fun requireTrue (Lio/github/bartlomiejkrawczyk/linearsolver/expression/BooleanVariable;)Lio/github/bartlomiejkrawczyk/linearsolver/constraint/Constraint;
+	public final fun setConstraints (Ljava/util/List;)V
+	public final fun setNumThreads (Ljava/lang/Integer;)V
 	public final fun setObjective (Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;)V
 	public final fun setSequence (I)V
 	public final fun setSolver (Lio/github/bartlomiejkrawczyk/linearsolver/solver/SolverType;)V
+	public final fun setSolverInstance (Lcom/google/ortools/linearsolver/MPSolver;)V
+	public final fun setStatus (Lcom/google/ortools/linearsolver/MPSolver$ResultStatus;)V
 	public final fun setTolerance (D)V
+	public final fun setVariables (Ljava/util/Map;)V
+	public final fun solve ()Lio/github/bartlomiejkrawczyk/linearsolver/objective/Solution;
 	public final fun solver (Lio/github/bartlomiejkrawczyk/linearsolver/solver/SolverType;)V
 	public fun sum (Ljava/lang/Iterable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun sum ([Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
@@ -440,6 +510,7 @@ public class io/github/bartlomiejkrawczyk/linearsolver/model/SolverConfiguration
 	public fun times (Ljava/lang/Number;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Parameter;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public fun times (Ljava/lang/Number;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public final fun to (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;)Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;
+	public fun toString ()Ljava/lang/String;
 	public final fun vectorBoolVar (Ljava/util/List;Ljava/lang/String;)Lio/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensor;
 	public static synthetic fun vectorBoolVar$default (Lio/github/bartlomiejkrawczyk/linearsolver/model/SolverConfigurationBuilder;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lio/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensor;
 	public final fun vectorIntVar (Ljava/util/List;Ljava/lang/String;Ljava/lang/Number;Ljava/lang/Number;)Lio/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensor;
@@ -468,15 +539,21 @@ public final class io/github/bartlomiejkrawczyk/linearsolver/objective/Goal : ja
 }
 
 public final class io/github/bartlomiejkrawczyk/linearsolver/objective/Objective {
-	public fun <init> (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;)V
+	public fun <init> (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;Lcom/google/ortools/linearsolver/MPObjective;)V
+	public synthetic fun <init> (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;Lcom/google/ortools/linearsolver/MPObjective;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public final fun component2 ()Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;
-	public final fun copy (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;)Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;
-	public static synthetic fun copy$default (Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;ILjava/lang/Object;)Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;
+	public final fun component3 ()Lcom/google/ortools/linearsolver/MPObjective;
+	public final fun copy (Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;Lcom/google/ortools/linearsolver/MPObjective;)Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;
+	public static synthetic fun copy$default (Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;Lcom/google/ortools/linearsolver/MPObjective;ILjava/lang/Object;)Lio/github/bartlomiejkrawczyk/linearsolver/objective/Objective;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBestBound ()D
 	public final fun getExpression ()Lio/github/bartlomiejkrawczyk/linearsolver/expression/Expression;
 	public final fun getGoal ()Lio/github/bartlomiejkrawczyk/linearsolver/objective/Goal;
+	public final fun getObjective ()Lcom/google/ortools/linearsolver/MPObjective;
+	public final fun getValue ()D
 	public fun hashCode ()I
+	public final fun setObjective (Lcom/google/ortools/linearsolver/MPObjective;)V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -516,15 +593,18 @@ public final class io/github/bartlomiejkrawczyk/linearsolver/objective/Solution 
 	public static synthetic fun copy$default (Lio/github/bartlomiejkrawczyk/linearsolver/objective/Solution;Lcom/google/ortools/linearsolver/MPSolver$ResultStatus;Lio/github/bartlomiejkrawczyk/linearsolver/model/SolverConfiguration;Lio/github/bartlomiejkrawczyk/linearsolver/model/SolverConfigurationBuilder;ILjava/lang/Object;)Lio/github/bartlomiejkrawczyk/linearsolver/objective/Solution;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun exportModelAsLpFormat ()Ljava/lang/String;
+	public final fun get (Ljava/lang/String;)Lio/github/bartlomiejkrawczyk/linearsolver/expression/Variable;
 	public final fun getBuilder ()Lio/github/bartlomiejkrawczyk/linearsolver/model/SolverConfigurationBuilder;
 	public final fun getConfig ()Lio/github/bartlomiejkrawczyk/linearsolver/model/SolverConfiguration;
 	public fun getConstraints ()Ljava/util/List;
 	public fun getObjective ()Lcom/google/ortools/linearsolver/MPObjective;
 	public final fun getObjectiveValue ()D
+	public final fun getOptimal ()Z
 	public fun getSolver ()Lcom/google/ortools/linearsolver/MPSolver;
 	public final fun getStatus ()Lcom/google/ortools/linearsolver/MPSolver$ResultStatus;
 	public fun getVariables ()Ljava/util/List;
 	public fun hashCode ()I
+	public final fun print ()V
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -569,11 +649,18 @@ public final class io/github/bartlomiejkrawczyk/linearsolver/solver/SolverType :
 
 public class io/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensor {
 	public fun <init> ()V
-	public fun <init> (Ljava/util/List;Ljava/util/Map;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Ljava/util/List;Ljava/util/Map;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Ljava/util/Map;Lkotlin/jvm/functions/Function1;Ljava/lang/Object;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/Map;Lkotlin/jvm/functions/Function1;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun get ([Ljava/lang/Object;)Ljava/lang/Object;
 	public final fun getDefaultValueProvider ()Lkotlin/jvm/functions/Function1;
 	public final fun getKeys ()Ljava/util/List;
 	public final fun getValues ()Ljava/util/Map;
+	public final fun getWildcard ()Ljava/lang/Object;
+	public final fun subTensor (Ljava/util/List;)Lio/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensor;
+}
+
+public final class io/github/bartlomiejkrawczyk/linearsolver/utils/OptimizerStringUtils {
+	public static final field INSTANCE Lio/github/bartlomiejkrawczyk/linearsolver/utils/OptimizerStringUtils;
+	public static final fun formatDouble (D)Ljava/lang/String;
 }
 

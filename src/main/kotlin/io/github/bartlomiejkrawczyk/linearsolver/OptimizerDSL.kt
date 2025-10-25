@@ -8,7 +8,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.Solution
  *
  * Example:
  * ```kotlin
- * val result = optimization {
+ * val result = solve {
  *     val x1 = numVar("x1", lowerBound = 0.0)
  *     val x2 = numVar("x2", lowerBound = 0.0)
  *
@@ -25,7 +25,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.Solution
  * @param block The DSL block describing variables, constraints, and objective.
  * @return A [Solution] containing the solver results and configuration.
  */
-public fun optimization(block: SolverConfigurationBuilder.() -> Unit): Solution {
+public fun solve(block: SolverConfigurationBuilder.() -> Unit): Solution {
     val builder = SolverConfigurationBuilder()
     builder.block()
     val config = builder.build()
@@ -38,6 +38,37 @@ public fun optimization(block: SolverConfigurationBuilder.() -> Unit): Solution 
         config = config,
         builder = builder,
     )
+}
+
+/**
+ * Builds, solves, and validates an optimization model using the Kotlin DSL.
+ *
+ * Example:
+ * ```kotlin
+ * val result = optimize {
+ *     val x1 = numVar("x1", lowerBound = 0.0)
+ *     val x2 = numVar("x2", lowerBound = 0.0)
+ *
+ *     constraint { 3*x1 + 2*x2 le 10 }
+ *     constraint { x1 + x2 ge 4 }
+ *
+ *     min(5*x1 + 4*x2)
+ *
+ *     solve()
+ *
+ *     return@optimize x1.solutionValue to x2.solutionValue
+ * }
+ *
+ * println("x1: ${result.first}")
+ * println("x2: ${result.second}")
+ * ```
+ *
+ * @param optimize The DSL block describing variables, constraints, objective and return value.
+ * @return A [T] containing the results.
+ */
+public fun <T> optimize(optimize: SolverConfigurationBuilder.() -> T): T {
+    val builder = SolverConfigurationBuilder()
+    return builder.optimize()
 }
 
 /**

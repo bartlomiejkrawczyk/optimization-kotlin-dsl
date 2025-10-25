@@ -1,5 +1,7 @@
 package io.github.bartlomiejkrawczyk.linearsolver.expression
 
+import io.github.bartlomiejkrawczyk.linearsolver.utils.OptimizerStringUtils.formatDouble
+
 /**
  * Represents a linear expression of variables, coefficients, and a constant term.
  *
@@ -19,4 +21,22 @@ package io.github.bartlomiejkrawczyk.linearsolver.expression
 public data class LinearExpression(
     override val coefficients: Map<VariableName, Double> = emptyMap(),
     override val constant: Double = 0.0,
-) : Expression
+) : Expression {
+    override fun toString(): String {
+        return buildString {
+            val terms = mutableListOf<String>()
+            for ((varName, coeff) in coefficients) {
+                val coeffStr = when {
+                    coeff == 1.0 -> ""
+                    coeff == -1.0 -> "-"
+                    else -> "${formatDouble(coeff)} "
+                }
+                terms.add("$coeffStr$varName")
+            }
+            if (constant != 0.0 || terms.isEmpty()) {
+                terms.add(formatDouble(constant))
+            }
+            append(terms.joinToString(" + ").replace("+ -", "- "))
+        }
+    }
+}

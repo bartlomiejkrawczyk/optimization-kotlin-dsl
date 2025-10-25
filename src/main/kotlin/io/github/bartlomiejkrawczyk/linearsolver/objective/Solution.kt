@@ -1,6 +1,9 @@
 package io.github.bartlomiejkrawczyk.linearsolver.objective
 
 import com.google.ortools.linearsolver.MPSolver
+import io.github.bartlomiejkrawczyk.linearsolver.expression.NumericVariable
+import io.github.bartlomiejkrawczyk.linearsolver.expression.Variable
+import io.github.bartlomiejkrawczyk.linearsolver.expression.VariableName
 import io.github.bartlomiejkrawczyk.linearsolver.model.OrToolsConfiguration
 import io.github.bartlomiejkrawczyk.linearsolver.model.SolverConfiguration
 import io.github.bartlomiejkrawczyk.linearsolver.model.SolverConfigurationBuilder
@@ -42,6 +45,15 @@ public data class Solution(
         get() = config.objective.value()
 
     /**
+     * Retrieves a variable by its name.
+     */
+    public operator fun get(variableName: String): Variable {
+        val variableName = VariableName(variableName)
+        return builder.variables[variableName]
+            ?: throw IllegalArgumentException("Unknown variable $variableName")
+    }
+
+    /**
      * Exports the model in LP text format.
      *
      * Example:
@@ -52,4 +64,34 @@ public data class Solution(
      */
     public fun exportModelAsLpFormat(): String =
         config.solver.exportModelAsLpFormat()
+
+    val optimal: Boolean
+        get() = status == MPSolver.ResultStatus.OPTIMAL
+
+    override fun toString(): String {
+        return buildString {
+            appendLine("Solution:")
+            appendLine("  Status: $status")
+            appendLine("  Objective:")
+            appendLine("    ${builder.objective}")
+            appendLine("    value = $objectiveValue")
+            appendLine("  Variables:")
+            for (variable in config.variables) {
+                appendLine("    ${variable.name()} = ${variable.solutionValue()}")
+            }
+            appendLine("  Constraints:")
+            val isContinuous = builder.variables.none { it !is NumericVariable }
+            for (constraint in builder.constraints) {
+                appendLine("    $constraint")
+                if (isContinuous) {
+                    appendLine("      dualValue = ${constraint.dualValue}")
+                    appendLine("      basisStatus = ${constraint.basisStatus}")
+                }
+            }
+        }
+    }
+
+    public fun print() {
+        println(this.toString())
+    }
 }

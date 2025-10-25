@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.bartlomiejkrawczyk/optimization-kotlin-dsl)](https://search.maven.org/artifact/io.github.bartlomiejkrawczyk/optimization-kotlin-dsl)
 
-> A concise Kotlin DSL wrapper for Google's [OR-Tools](https://developers.google.com/optimization) Linear Solver.
+> A concise Kotlin DSL wrapper for Google's [OR-Tools](https://developers.google.com/optimization) Linear and Mixed Integer Programming Solver.
 
 ## Overview
 

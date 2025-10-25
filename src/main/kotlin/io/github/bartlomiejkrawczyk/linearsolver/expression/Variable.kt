@@ -1,6 +1,8 @@
 package io.github.bartlomiejkrawczyk.linearsolver.expression
 
+import com.google.ortools.linearsolver.MPVariable
 import java.io.Serializable
+import kotlin.math.roundToInt
 
 /**
  * Represents the symbolic name of a decision variable in an optimization model.
@@ -31,7 +33,7 @@ public value class VariableName(public val value: String) : Serializable
  *
  * These expressions can later be used to define constraints or objectives.
  */
-public interface Variable : Expression {
+public sealed interface Variable : Expression {
 
     /** The unique name identifying this variable. */
     public val name: VariableName
@@ -41,6 +43,34 @@ public interface Variable : Expression {
      */
     override val coefficients: Map<VariableName, Double>
         get() = mapOf(name to 1.0)
+
+    /**
+     * The underlying solver variable associated with this variable.
+     */
+    public var variable: MPVariable?
+
+    /**
+     * Returns the value of the variable in the current solution.
+     *
+     * If the variable is integer, then the value will always be an integer (the
+     * underlying solver handles floating-point values only, but this function
+     * automatically rounds it to the nearest integer; see: man 3 round).
+     */
+    public val solutionValue: Double
+        get() = (variable ?: throw IllegalStateException("Variable $name has not been assigned an MPVariable yet"))
+            .solutionValue()
+
+    /**
+     * Returns the boolean interpretation of the variable's solution value.
+     */
+    public val booleanValue: Boolean
+        get() = solutionValue >= 0.5
+
+    /**
+     * Returns the integer interpretation of the variable's solution value.
+     */
+    public val integerValue: Int
+        get() = solutionValue.roundToInt()
 
     /**
      * Negates the variable, producing a [Parameter] with a coefficient of `-1.0`.
@@ -268,6 +298,7 @@ public interface Variable : Expression {
  */
 public open class BooleanVariable(
     override val name: VariableName,
+    override var variable: MPVariable? = null,
 ) : Variable
 
 /**
@@ -286,6 +317,7 @@ public open class IntegerVariable(
     override val name: VariableName,
     public val lowerBound: Double = Double.NEGATIVE_INFINITY,
     public val upperBound: Double = Double.POSITIVE_INFINITY,
+    override var variable: MPVariable? = null,
 ) : Variable
 
 /**
@@ -304,4 +336,5 @@ public open class NumericVariable(
     override val name: VariableName,
     public val lowerBound: Double = Double.NEGATIVE_INFINITY,
     public val upperBound: Double = Double.POSITIVE_INFINITY,
+    override var variable: MPVariable? = null,
 ) : Variable

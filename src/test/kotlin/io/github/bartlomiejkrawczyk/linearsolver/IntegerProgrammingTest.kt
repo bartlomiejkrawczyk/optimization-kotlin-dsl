@@ -12,7 +12,7 @@ class IntegerProgrammingTest {
     fun `integer programming optimization should be optimal`() {
         // https://github.com/google/or-tools/blob/stable/examples/java/IntegerProgramming.java
 
-        val (status, config) = optimization {
+        val (status, config) = solve {
             solver(SolverType.SCIP_MIXED_INTEGER_PROGRAMMING)
 
             val x1 = intVar("x1", lowerBound = 0.0)

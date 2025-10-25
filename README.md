@@ -22,7 +22,7 @@ its concept to cover a wider range of solver types.
 ## Example Usage
 
 ```kotlin
-val (status, config) = optimization {
+val (status, config) = optimize {
     solver(SolverType.SCIP_MIXED_INTEGER_PROGRAMMING)
 
     val x = intVar("x")
@@ -45,6 +45,8 @@ val (status, config) = optimization {
     }
 
     variables.sum() le y
+    
+    solve()
 }
 
 println("OBJECTIVE")
@@ -70,7 +72,7 @@ z = 1.0
 ### Flow Network
 
 ```kotlin
-val (status, config) = optimization {
+val (status, config) = optimize {
     solver(SolverType.GLOP_LINEAR_PROGRAMMING)
 
     val totalCost = numVar("totalCost", lowerBound = 0.0)
@@ -110,6 +112,8 @@ val (status, config) = optimization {
             }
         }
     }
+    
+    solve()
 }
 ```
 

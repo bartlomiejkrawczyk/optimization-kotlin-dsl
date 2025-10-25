@@ -657,6 +657,12 @@ public class io/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensor {
 	public final fun getValues ()Ljava/util/Map;
 	public final fun getWildcard ()Ljava/lang/Object;
 	public final fun subTensor (Ljava/util/List;)Lio/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensor;
+	public final fun subTensor ([Ljava/lang/Object;)Lio/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensor;
+}
+
+public final class io/github/bartlomiejkrawczyk/linearsolver/tensor/NamedTensorKt {
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
 }
 
 public final class io/github/bartlomiejkrawczyk/linearsolver/utils/OptimizerStringUtils {

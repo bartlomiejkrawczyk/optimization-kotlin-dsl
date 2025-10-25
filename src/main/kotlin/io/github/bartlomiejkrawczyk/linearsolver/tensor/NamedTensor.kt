@@ -67,49 +67,152 @@ public open class NamedTensor<K, V>(
     }
 
     /**
-     * Returns a sub-tensor defined by the given partial key prefix.
-     * Wildcards ("*") expand to all allowed keys in that dimension.
+     * Return a sub-tensor following MATLAB-like dimensional reduction rules:
+     *  - A specific key (not equal to wildcard) collapses that dimension (dimension removed).
+     *  - A wildcard (key == wildcard) keeps that dimension and all keys along it are included.
+     *  - If fewer selectors are provided than dimensions, the remaining dimensions are treated as wildcard.
+     *
+     * The return is:
+     *  - NamedTensor<K,V> if there are remaining (kept) dimensions,
+     *  - an error if all dimensions are collapsed (use get operator instead).
      */
     public fun subTensor(vararg partialKeys: K): NamedTensor<K, V> {
         return subTensor(partialKeys.toList())
     }
 
     /**
-     * Returns a sub-tensor defined by the given partial key prefix.
-     * Wildcards ("*") expand to all allowed keys in that dimension.
+     * Return a sub-tensor following MATLAB-like dimensional reduction rules:
+     *  - A specific key (not equal to wildcard) collapses that dimension (dimension removed).
+     *  - A wildcard (key == wildcard) keeps that dimension and all keys along it are included.
+     *  - If fewer selectors are provided than dimensions, the remaining dimensions are treated as wildcard.
+     *
+     * The return is:
+     *  - NamedTensor<K,V> if there are remaining (kept) dimensions,
+     *  - an error if all dimensions are collapsed (use get operator instead).
      */
     @Suppress("UNCHECKED_CAST")
     public fun subTensor(partialKeys: List<K>): NamedTensor<K, V> {
-        fun recurse(
-            currentMap: Map<K, Any>,
-            dim: Int
-        ): Map<K, Any> {
-            if (dim >= partialKeys.size) return currentMap
+        fun isWildcardAt(dim: Int): Boolean {
+            if (dim >= partialKeys.size) return true
+            val selector = partialKeys[dim]
+            return selector == wildcard
+        }
 
-            val key = partialKeys[dim]
-            val possibleKeys = keys[dim]
+        val remainingKeysLists: List<List<K>> =
+            keys.mapIndexedNotNull { idx, possible ->
+                if (isWildcardAt(idx)) possible else null
+            }
 
-            val selectedKeys = if (key == wildcard) possibleKeys else listOf(key)
+        val reducedRoot = mutableMapOf<K, Any>()
 
-            val subValues = selectedKeys.associateWith { k ->
-                when (val v = currentMap[k]) {
-                    is Map<*, *> -> recurse(v as Map<K, Any>, dim + 1)
-                    null -> mapOf<K, Any>() // missing branch
-                    else -> v
+        fun insertNested(root: MutableMap<K, Any>, path: List<K>, value: Any?) {
+            if (path.isEmpty()) {
+                return
+            }
+
+            var cur: MutableMap<K, Any> = root
+            for (i in 0 until path.size - 1) {
+                val k = path[i]
+                val next = cur[k]
+                if (next == null || next !is MutableMap<*, *>) {
+                    val newMap = mutableMapOf<K, Any>()
+                    cur[k] = newMap
+                    cur = newMap
+                } else {
+                    cur = next as MutableMap<K, Any>
                 }
             }
 
-            return subValues
+            val lastKey = path.last()
+            if (value is Map<*, *>) {
+                // Deep-clean nested map
+                val cleaned = (value as Map<K, Any?>)
+                    .filterValues { it != null }
+                    .mapValues { (_, v) -> v!! }
+                if (cleaned.isNotEmpty()) cur[lastKey] = cleaned
+            } else if (value != null) {
+                cur[lastKey] = value
+            }
         }
 
-        val newValues = recurse(values, 0)
+        fun traverse(node: Any?, dim: Int, remainingPath: MutableList<K>) {
+            if (dim == keys.size) {
+                insertNested(reducedRoot, remainingPath, node)
+                return
+            }
 
-        val remainingKeys = keys.drop(partialKeys.size)
+            val possibleKeys = keys[dim]
+
+            if (isWildcardAt(dim)) {
+                if (node !is Map<*, *>) return
+
+                for ((keyAny, v) in node) {
+                    val k = keyAny as K
+                    if (!possibleKeys.contains(k)) continue
+                    if (v == null) continue
+                    remainingPath.add(k)
+                    traverse(v, dim + 1, remainingPath)
+                    remainingPath.removeAt(remainingPath.size - 1)
+                }
+            } else {
+                val sel = partialKeys[dim]
+                if (!possibleKeys.contains(sel)) {
+                    throw IllegalArgumentException("Key $sel is not allowed in $possibleKeys")
+                }
+                if (node !is Map<*, *>) return
+                val child = node[sel] ?: return
+                traverse(child, dim + 1, remainingPath)
+            }
+        }
+
+        traverse(values, 0, mutableListOf())
+
+        if (remainingKeysLists.isEmpty()) {
+            error("value return type not supported - use get operator instead")
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        fun makeImmutableMap(m: MutableMap<K, Any>): Map<K, Any> {
+            val out = mutableMapOf<K, Any>()
+            for ((k, v) in m) {
+                when (v) {
+                    is MutableMap<*, *> -> {
+                        val cleaned = makeImmutableMap(v as MutableMap<K, Any>)
+                        if (cleaned.isNotEmpty()) out[k] = cleaned
+                    }
+                    else -> if (v != null) out[k] = v
+                }
+            }
+            return out
+        }
+
+        val newValues = makeImmutableMap(reducedRoot)
 
         return NamedTensor(
-            keys = remainingKeys,
+            keys = remainingKeysLists,
             values = newValues,
-            defaultValueProvider = defaultValueProvider
+            defaultValueProvider = defaultValueProvider,
+            wildcard = wildcard
         )
     }
+}
+
+public fun main() {
+    val tensor = NamedTensor<String, Int>(
+        keys = listOf(listOf("i1", "i2"), listOf("j1", "j2")),
+        values = mapOf(
+            "i1" to mapOf("j1" to 1),
+            "i2" to mapOf("j1" to 3, "j2" to 4)
+        ),
+        wildcard = "*"
+    )
+
+
+    println(tensor.values)
+    println(tensor.subTensor("*").values)
+    println(tensor.subTensor("*", "*").values)
+    println(tensor.subTensor("i1").values)
+    println(tensor.subTensor("i2").values)
+    println(tensor.subTensor("*", "j1").values)
+    println(tensor.subTensor("*", "j2").values)
 }

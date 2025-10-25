@@ -15,6 +15,7 @@ import io.github.bartlomiejkrawczyk.linearsolver.objective.ObjectiveBuilder
 import io.github.bartlomiejkrawczyk.linearsolver.objective.Solution
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 import io.github.bartlomiejkrawczyk.linearsolver.tensor.NamedTensor
+import io.github.bartlomiejkrawczyk.linearsolver.utils.OptimizerStringUtils.formatDouble
 
 public fun <T> cartesianProduct(lists: List<List<T>>): Sequence<List<T>> {
     return lists.fold(sequenceOf(emptyList())) { acc, list ->
@@ -1219,6 +1220,46 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
     // Model building
     // -------------------------------------------------------------------------
 
+    public override fun toString(): String {
+        return buildString {
+            appendLine("SolverConfigurationBuilder:")
+            appendLine("  Solver Type: $solver")
+            appendLine("  Tolerance: $tolerance")
+            numThreads?.let {
+                appendLine("  Num Threads: $it")
+            }
+            appendLine("  Objective:")
+            appendLine("    $objective")
+            appendLine("  Variables:")
+            for (variable in variables.values) {
+                when (variable) {
+                    is BooleanVariable -> appendLine("    $variable")
+                    is BoundedVariable -> {
+                        val lbFinite = variable.lowerBound != Double.NEGATIVE_INFINITY
+                        val ubFinite = variable.upperBound != Double.POSITIVE_INFINITY
+                        val bounds = when {
+                            lbFinite && ubFinite ->
+                                "${formatDouble(variable.lowerBound)} <= $variable <= ${formatDouble(variable.upperBound)}"
+
+                            lbFinite -> "${formatDouble(variable.lowerBound)} <= $variable"
+                            ubFinite -> "$variable <= ${formatDouble(variable.upperBound)}"
+                            else -> variable.toString()
+                        }
+                        appendLine("    $bounds")
+                    }
+                }
+            }
+            appendLine("  Constraints:")
+            for (constraint in constraints) {
+                appendLine("    $constraint")
+            }
+        }
+    }
+
+    public fun print() {
+        println(this.toString())
+    }
+
     /**
      * Builds and validates the solver configuration.
      *
@@ -1289,6 +1330,8 @@ public open class SolverConfigurationBuilder : OptimizerExtensions {
                         variable.name.value,
                     )
                 }
+
+                else -> throw IllegalStateException("Unsupported variable type: ${variable::class}")
             }
 
             variable.variable = solverVariable

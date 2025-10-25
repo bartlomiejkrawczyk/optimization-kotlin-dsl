@@ -1,5 +1,7 @@
 package io.github.bartlomiejkrawczyk.linearsolver.expression
 
+import io.github.bartlomiejkrawczyk.linearsolver.utils.OptimizerStringUtils.formatDouble
+
 /**
  * Represents a single variable with a scalar coefficient.
  *
@@ -228,5 +230,14 @@ public data class Parameter(
             coefficients = newCoefficients,
             constant = -expression.constant,
         )
+    }
+
+    override fun toString(): String {
+        val coeffStr = when (coefficient) {
+            1.0 -> ""
+            -1.0 -> "-"
+            else -> "${formatDouble(coefficient)} "
+        }
+        return "$coeffStr$name"
     }
 }

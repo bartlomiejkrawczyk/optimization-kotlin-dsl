@@ -70,12 +70,15 @@ class LinearProgrammingTest {
             println("Number of variables = ${this.variables.size}")
             println("Number of constraints = ${this.constraints.size}")
 
-            solve()
+            val solution = solve()
 
             Assertions.assertEquals(
                 MPSolver.ResultStatus.OPTIMAL,
                 status,
             )
+
+            print()
+            solution.print()
 
             return@optimize x1.solutionValue to x2.solutionValue
         }

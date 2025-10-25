@@ -55,4 +55,22 @@ public data class Constraint(
         get() =
             (constraint ?: throw IllegalStateException("Constraint not yet added to solver"))
                 .basisStatus()
+
+    override fun toString(): String {
+        return buildString {
+            if (name != null) {
+                append("$name: ")
+            }
+
+            append("$left ")
+
+            when (relationship) {
+                Relationship.LESS_EQUALS -> append("<=")
+                Relationship.EQUALS -> append("=")
+                Relationship.GREATER_EQUALS -> append(">=")
+            }
+
+            append(" $right")
+        }
+    }
 }

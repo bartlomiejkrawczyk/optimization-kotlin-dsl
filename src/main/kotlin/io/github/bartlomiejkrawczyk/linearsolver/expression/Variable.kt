@@ -12,7 +12,9 @@ import kotlin.math.roundToInt
  * @property value The string name of the variable.
  */
 @JvmInline
-public value class VariableName(public val value: String) : Serializable
+public value class VariableName(public val value: String) : Serializable {
+    override fun toString(): String = value
+}
 
 /**
  * Represents a variable term in an optimization expression.
@@ -33,7 +35,7 @@ public value class VariableName(public val value: String) : Serializable
  *
  * These expressions can later be used to define constraints or objectives.
  */
-public sealed interface Variable : Expression {
+public interface Variable : Expression {
 
     /** The unique name identifying this variable. */
     public val name: VariableName
@@ -299,7 +301,14 @@ public sealed interface Variable : Expression {
 public open class BooleanVariable(
     override val name: VariableName,
     override var variable: MPVariable? = null,
-) : Variable
+) : Variable {
+    override fun toString(): String = "(bool) $name"
+}
+
+public interface BoundedVariable : Variable {
+    public val lowerBound: Double
+    public val upperBound: Double
+}
 
 /**
  * Represents an integer decision variable with optional bounds.
@@ -315,10 +324,12 @@ public open class BooleanVariable(
  */
 public open class IntegerVariable(
     override val name: VariableName,
-    public val lowerBound: Double = Double.NEGATIVE_INFINITY,
-    public val upperBound: Double = Double.POSITIVE_INFINITY,
+    override val lowerBound: Double = Double.NEGATIVE_INFINITY,
+    override val upperBound: Double = Double.POSITIVE_INFINITY,
     override var variable: MPVariable? = null,
-) : Variable
+) : BoundedVariable {
+    override fun toString(): String = "(int) $name"
+}
 
 /**
  * Represents a continuous (numeric) decision variable with optional bounds.
@@ -334,7 +345,9 @@ public open class IntegerVariable(
  */
 public open class NumericVariable(
     override val name: VariableName,
-    public val lowerBound: Double = Double.NEGATIVE_INFINITY,
-    public val upperBound: Double = Double.POSITIVE_INFINITY,
+    override val lowerBound: Double = Double.NEGATIVE_INFINITY,
+    override val upperBound: Double = Double.POSITIVE_INFINITY,
     override var variable: MPVariable? = null,
-) : Variable
+) : BoundedVariable {
+    override fun toString(): String = name.toString()
+}

@@ -46,4 +46,14 @@ public data class Objective(
         get() =
             (objective ?: throw IllegalStateException("Objective not yet added to solver"))
                 .bestBound()
+
+    override fun toString(): String {
+        return buildString {
+            when (goal) {
+                Goal.MIN -> append("min: ")
+                Goal.MAX -> append("max: ")
+            }
+            append(expression.toString())
+        }
+    }
 }

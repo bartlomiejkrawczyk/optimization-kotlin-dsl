@@ -66,4 +66,28 @@ public data class Solution(
 
     val optimal: Boolean
         get() = status == MPSolver.ResultStatus.OPTIMAL
+
+    override fun toString(): String {
+        return buildString {
+            appendLine("Solution:")
+            appendLine("  Status: $status")
+            appendLine("  Objective:")
+            appendLine("    ${builder.objective}")
+            appendLine("    value = $objectiveValue")
+            appendLine("  Variables:")
+            for (variable in config.variables) {
+                appendLine("    ${variable.name()} = ${variable.solutionValue()}")
+            }
+            appendLine("  Constraints:")
+            for (constraint in builder.constraints) {
+                appendLine("    $constraint")
+                appendLine("      dualValue = ${constraint.dualValue}")
+                appendLine("      basisStatus = ${constraint.basisStatus}")
+            }
+        }
+    }
+
+    public fun print() {
+        println(this.toString())
+    }
 }

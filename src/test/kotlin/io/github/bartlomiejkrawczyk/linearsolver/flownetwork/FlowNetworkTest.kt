@@ -1,6 +1,7 @@
 package io.github.bartlomiejkrawczyk.linearsolver.flownetwork
 
 import com.google.ortools.linearsolver.MPSolver
+import io.github.bartlomiejkrawczyk.linearsolver.optimize
 import io.github.bartlomiejkrawczyk.linearsolver.solve
 import io.github.bartlomiejkrawczyk.linearsolver.solver.SolverType
 import io.github.bartlomiejkrawczyk.linearsolver.tensor.NamedTensor
@@ -199,7 +200,7 @@ class FlowNetworkTest {
 
     @Test
     fun `optimize flow network - max total flow`() {
-        val solution = solve {
+        val solution = optimize {
             solver(SolverType.GLOP_LINEAR_PROGRAMMING)
 
             val totalFlow = numVar("totalFlow", lowerBound = 0.0)
@@ -231,6 +232,13 @@ class FlowNetworkTest {
                     }
                 }
             }
+
+            val solution = solve()
+
+            print()
+            solution.print()
+
+            solution
         }
         val (status, config) = solution
 

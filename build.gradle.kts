@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.bartlomiejkrawczyk"
-description = "optimization-kotlin-dsl"
+description = "A concise Kotlin DSL wrapper for Google's OR-Tools Linear and Mixed Integer Programming Solver."
 
 kotlin {
     jvmToolchain(17)

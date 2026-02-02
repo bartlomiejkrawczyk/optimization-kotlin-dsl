@@ -61,7 +61,7 @@ configurations {
 }
 
 dependencies {
-    api("com.google.ortools:ortools-java:9.14.6206")
+    api("com.google.ortools:ortools-java:9.15.6755")
 
     testImplementation(platform("org.junit:junit-bom:6.0.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

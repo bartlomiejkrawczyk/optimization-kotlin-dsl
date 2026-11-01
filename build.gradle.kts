@@ -8,7 +8,7 @@ plugins {
     id("maven-publish")
     id("com.coditory.manifest") version "1.1.0"
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
-    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.2"
 }
 
 group = "io.github.bartlomiejkrawczyk"
